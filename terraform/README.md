@@ -99,6 +99,61 @@ kubectl -n headease-homemonitoring rollout restart deployment headease-homemonit
 | `organization_name` | `HeadEase` | Organization name |
 | `cert_secret_name` | `headease-homemonitoring-certs` | K8s Secret with certs |
 
+## GitHub Actions CI/CD
+
+The `.github/workflows/deploy.yml` workflow automatically builds and deploys on push to `main`. It requires a `GCP_SA_KEY` secret in the GitHub repository.
+
+### Create the service account
+
+```bash
+PROJECT=cumuluz-vws-hackathon-april-26
+
+# Create service account
+gcloud iam service-accounts create github-deploy \
+  --display-name="GitHub Actions Deploy" \
+  --project=$PROJECT
+
+SA_EMAIL=github-deploy@${PROJECT}.iam.gserviceaccount.com
+
+# Grant required roles
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/container.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/artifactregistry.writer"
+
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/storage.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/iam.serviceAccountUser"
+
+# Create and download key
+gcloud iam service-accounts keys create github-deploy-key.json \
+  --iam-account=$SA_EMAIL
+```
+
+### Add the secret to GitHub
+
+1. Go to the GitHub repository **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `GCP_SA_KEY`
+4. Value: paste the contents of `github-deploy-key.json`
+5. Delete the local key file: `rm github-deploy-key.json`
+
+### Required roles summary
+
+| Role | Purpose |
+|------|---------|
+| `roles/container.admin` | Create/manage GKE cluster, deploy Helm charts |
+| `roles/artifactregistry.writer` | Push Docker images |
+| `roles/storage.admin` | Access Terraform state bucket |
+| `roles/iam.serviceAccountUser` | Create resources as the service account |
+
 ## Tear down
 
 ```bash
