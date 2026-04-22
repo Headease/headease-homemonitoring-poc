@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "headease.fullname" . }}-config
+  labels:
+    {{- include "headease.labels" . | nindent 4 }}
+data:
+  HEADEASE_FHIR_BASE_URL: {{ .Values.config.fhirBaseUrl | quote }}
+  HEADEASE_LRZA_BASE_URL: {{ .Values.config.lrzaBaseUrl | quote }}
+  HEADEASE_NVI_BASE_URL: {{ .Values.config.nviBaseUrl | quote }}
+  HEADEASE_PRS_BASE_URL: {{ .Values.config.prsBaseUrl | quote }}
+  HEADEASE_OAUTH_BASE_URL: {{ .Values.config.oauthBaseUrl | quote }}
+  HEADEASE_URA_NUMBER: {{ .Values.config.uraNumber | quote }}
+  HEADEASE_ORGANIZATION_NAME: {{ .Values.config.organizationName | quote }}
+  HEADEASE_NVI_URA_NUMBER: {{ .Values.config.nviUraNumber | quote }}
+  HEADEASE_CLIENT_CERT: "/certs/uzi-chain.crt"
+  HEADEASE_CLIENT_KEY: "/certs/private.key"
+  HEADEASE_UZI_CERT: "/certs/uzi.crt"
+  HEADEASE_UZI_INTERMEDIATE_CERT: "/certs/uzi-intermediate.cer"
+  HEADEASE_LDN_CERT: "/certs/ldn.crt"
+  HEADEASE_LDN_CHAIN_CERT: "/certs/ldn-chain.crt"

@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+  repository: headease-homemonitoring
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: nginx
+  host: ngrok.headease.nl
+  tls: []
+
+config:
+  fhirBaseUrl: "https://ngrok.headease.nl/fhir"
+  lrzaBaseUrl: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
+  nviBaseUrl: "https://nvi.proeftuin.gf.irealisatie.nl"
+  prsBaseUrl: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
+  oauthBaseUrl: "https://oauth.proeftuin.gf.irealisatie.nl"
+  uraNumber: "90000315"
+  organizationName: "HeadEase"
+  nviUraNumber: "90000901"
+
+# TLS certificates — provide as an existing Secret or inline values
+certificates:
+  # Name of an existing secret containing the certificate files
+  existingSecret: ""
+  # If no existingSecret, provide base64-encoded cert data below
+  uziCert: ""
+  uziChainCert: ""
+  uziIntermediateCert: ""
+  ldnCert: ""
+  ldnChainCert: ""
+  privateKey: ""
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi

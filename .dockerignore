@@ -1,0 +1,15 @@
+.venv/
+.git/
+.claude/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+*.p12
+*.key
+*.cer
+certificates/
+work-documents/
+docs/
+.env
+.DS_Store
