@@ -35,8 +35,9 @@ class Settings(BaseSettings):
     # LDN cert: used for mTLS connections (thumbprint in JWT cnf)
     ldn_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt")
     ldn_chain_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt")
-    # Trusted LDN CA for validating incoming client assertions
+    # Trusted CAs for validating incoming client assertions
     ldn_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt")
+    uzi_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-uzi-external-intermediate/uzi-ca.crt")
 
     # Nuts-knooppunt internal API host
     nk_host: str = "nuts-knooppunt"
@@ -77,6 +78,10 @@ class Settings(BaseSettings):
     @property
     def ldn_ca_cert_path(self) -> Path:
         return self._resolve(self.ldn_ca_cert)
+
+    @property
+    def uzi_ca_cert_path(self) -> Path:
+        return self._resolve(self.uzi_ca_cert)
 
 
 settings = Settings()
