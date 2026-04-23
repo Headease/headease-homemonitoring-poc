@@ -192,10 +192,14 @@ async def issue_token(
         logger.error("Invalid JWT signature: %s", e)
         raise HTTPException(status_code=401, detail=f"Invalid JWT: {e}")
 
-    # Validate audience — must match our FHIR base URL
+    # Per RFC 7523, JWT `aud` = our token endpoint URL.
+    # The target service URL goes in the `target_audience` claim.
     jwt_aud = claims.get("aud", "")
-    if jwt_aud != settings.fhir_base_url:
-        logger.warning("JWT aud mismatch: got %s, expected %s", jwt_aud, settings.fhir_base_url)
+    jwt_target_aud = claims.get("target_audience", "")
+    logger.info("JWT aud=%s, target_audience=%s", jwt_aud, jwt_target_aud)
+    if jwt_target_aud and jwt_target_aud != settings.fhir_base_url:
+        logger.warning("JWT target_audience mismatch: got %s, expected %s",
+                       jwt_target_aud, settings.fhir_base_url)
 
     # Store token context in Redis
     context = {

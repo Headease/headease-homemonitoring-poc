@@ -22,6 +22,8 @@ REQUIRED_HEADERS = [
 HOP_BY_HOP = {
     "connection", "keep-alive", "proxy-authenticate", "proxy-authorization",
     "te", "trailers", "transfer-encoding", "upgrade", "host", "content-length",
+    # httpx auto-decompresses, so these headers no longer describe the body we return
+    "content-encoding",
 }
 
 
