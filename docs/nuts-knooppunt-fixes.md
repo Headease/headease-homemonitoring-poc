@@ -107,43 +107,17 @@ requestBody := prsEvaluateRequest{
 
 ---
 
-## Fix 3: `blind_factor` encoding in NVI subject identifier (component.go)
+## Fix 3 (unverified): `blind_factor` encoding in NVI subject identifier (component.go)
 
 **File:** `component/pseudonymisation/component.go` (around line 97-111)
 
-**Problem:** The `BlindFactor` field is declared as `[]byte`, which Go encodes as base64 standard. The NVI and reference implementations expect base64url encoding for the blind factor value.
+**Status:** Not yet confirmed as a real issue. Both encodings may work.
 
-**Current code:**
-```go
-type subjectIdentifier struct {
-    BlindFactor     []byte `json:"blind_factor"`
-    EvaluatedOutput string `json:"evaluated_output"`
-}
-```
+**Observation:** The `BlindFactor` field is declared as `[]byte`, which Go's `json.Marshal` encodes as base64 standard (alphabet `+/`). The Python reference uses base64url (alphabet `-_`). For ~50% of blind factors these produce different strings.
 
-**Fix:** Change to `string` and encode explicitly:
-```go
-type subjectIdentifier struct {
-    BlindFactor     string `json:"blind_factor"`
-    EvaluatedOutput string `json:"evaluated_output"`
-}
-```
+The NVI stores the `blind_factor` in the `subject:identifier` and uses it later for deblinding. Whether it decodes as base64url or base64 standard (or both) is unknown. Both the Python reference and knooppunt can register successfully, so the NVI may accept both at registration time.
 
-And in `marshalSubjectIdentifier`:
-```go
-func marshalSubjectIdentifier(blindFactor []byte, evaluatedOutput string) (string, error) {
-    data, err := json.Marshal(subjectIdentifier{
-        BlindFactor:     base64.RawURLEncoding.EncodeToString(blindFactor),
-        EvaluatedOutput: evaluatedOutput,
-    })
-    if err != nil {
-        return "", fmt.Errorf("marshaling subject identifier: %w", err)
-    }
-    return base64.RawURLEncoding.EncodeToString(data), nil
-}
-```
-
-**Impact:** The NVI needs the blind factor to deblind the pseudonym. Wrong encoding means the NVI can't resolve the patient identity, making registrations unfindable.
+**Recommendation:** Only apply this fix if deblinding/localization fails. If the `Organization/$localize` endpoint can find records registered by the knooppunt, this fix is not needed.
 
 ---
 
