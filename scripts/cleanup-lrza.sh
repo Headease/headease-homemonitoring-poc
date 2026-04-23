@@ -18,7 +18,7 @@ echo "================================================"
 # Delete Endpoints
 echo ""
 echo "Searching for Endpoints..."
-ENDPOINT_IDS=$($CURL "$BASE/Endpoint?_format=json" | python3 -c "
+ENDPOINT_IDS=$($CURL "$BASE/Endpoint?_count=1000&_format=json" | python3 -c "
 import sys, json
 bundle = json.load(sys.stdin)
 for entry in bundle.get('entry', []):
@@ -40,7 +40,7 @@ fi
 # Delete Organizations
 echo ""
 echo "Searching for Organizations..."
-ORG_IDS=$($CURL "$BASE/Organization?identifier=http://fhir.nl/fhir/NamingSystem/ura|$URA&_format=json" | python3 -c "
+ORG_IDS=$($CURL "$BASE/Organization?identifier=http://fhir.nl/fhir/NamingSystem/ura|$URA&_count=1000&_format=json" | python3 -c "
 import sys, json
 bundle = json.load(sys.stdin)
 for entry in bundle.get('entry', []):
@@ -52,7 +52,7 @@ if [ -z "$ORG_IDS" ]; then
 else
     for id in $ORG_IDS; do
         echo "  Deleting Organization/$id..."
-        $CURL -X DELETE "$BASE/Organization/$id" -o /dev/null -w "  HTTP %{http_code}\n"
+        echo $CURL -X DELETE "$BASE/Organization/$id" -o /dev/null -w "  HTTP %{http_code}\n"
     done
 fi
 
