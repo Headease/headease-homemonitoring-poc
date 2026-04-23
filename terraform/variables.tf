@@ -37,7 +37,7 @@ variable "image_repository" {
 variable "image_tag" {
   description = "Docker image tag (should match pyproject.toml version)"
   type        = string
-  default     = "0.4.1"
+  default     = "0.4.2"
 }
 
 variable "host" {
