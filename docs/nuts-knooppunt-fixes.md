@@ -14,7 +14,41 @@ https://github.com/Headease/headease-homemonitoring-poc
 
 ---
 
-## Fix 1: OAuth client assertion field names (oauth2.go)
+## Fix 1: JSON serialization must include spaces (blinding.go)
+
+**File:** `component/pseudonymisation/blinding.go` (around line 19)
+
+**Problem:** Go's `json.Marshal` produces compact JSON without spaces (`{"landCode":"NL",...}`), but the PRS reference implementation (Python) and the proeftuin PRS use JSON with spaces after `:` and `,` (`{"landCode": "NL", ...}`). Since this JSON string is the HKDF input, different serialization → different pseudonym → registrations can't be found.
+
+**Current code:**
+```go
+identifierJSON, err := json.Marshal(identifier)
+```
+
+**Fix:** Use a custom serialization that matches Python's `json.dumps` default (space after `:` and `,`):
+```go
+identifierJSON, err := json.Marshal(identifier)
+if err != nil {
+    return nil, err
+}
+// Match Python json.dumps default: spaces after separators
+// This is required because the PRS reference implementation uses this format
+identifierJSONSpaced := strings.ReplaceAll(string(identifierJSON), ",", ", ")
+identifierJSONSpaced = strings.ReplaceAll(identifierJSONSpaced, ":", ": ")
+```
+
+Then use `[]byte(identifierJSONSpaced)` as the HKDF input.
+
+**Verification:** For BSN `004895708`, the HKDF input should be exactly:
+```
+{"landCode": "NL", "type": "BSN", "value": "004895708"}
+```
+
+**Impact:** Without this fix, the knooppunt produces different pseudonyms than the reference implementation and the proeftuin PRS test endpoint, making registrations invisible to other participants.
+
+---
+
+## Fix 2: OAuth client assertion field names (oauth2.go)
 
 **File:** `component/authn/oauth2.go` (around line 144)
 
@@ -126,7 +160,7 @@ func marshalSubjectIdentifier(blindFactor []byte, evaluatedOutput string) (strin
 After applying the fixes, the pseudonyms should be identical to those produced by the Python reference. You can verify by:
 
 1. Computing the HKDF pseudonym for the same BSN in both implementations — they should match:
-   - Input: `{"landCode":"NL","type":"BSN","value":"004895708"}` (no spaces!)
+   - Input: `{"landCode": "NL", "type": "BSN", "value": "004895708"}` (with spaces after `:` and `,`)
    - Info: `ura:90000901|nationale-verwijsindex|v1`
    - The derived 32-byte pseudonym (base64url) should be identical
 
@@ -135,7 +169,7 @@ After applying the fixes, the pseudonyms should be identical to those produced b
 3. The reference implementation logs the HKDF inputs and pseudonym for easy comparison:
    ```
    INFO:headease.pseudonymisation:HKDF info: ura:90000901|nationale-verwijsindex|v1
-   INFO:headease.pseudonymisation:HKDF pid:  {"landCode":"NL","type":"BSN","value":"004895708"}
+   INFO:headease.pseudonymisation:HKDF pid:  {"landCode": "NL", "type": "BSN", "value": "004895708"}
    INFO:headease.pseudonymisation:HKDF pseudonym: <base64url 32 bytes>
    ```
 
