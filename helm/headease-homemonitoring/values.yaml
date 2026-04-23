@@ -16,7 +16,7 @@ ingress:
   adminHost: admin.example.com
 
 config:
-  fhirBaseUrl: "https://ngrok.headease.nl/fhir"
+  fhirBaseUrl: "https://data-source.gf-cumuluz-poc.headease.nl/fhir"
   lrzaBaseUrl: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
   nviBaseUrl: "https://nvi.proeftuin.gf.irealisatie.nl"
   prsBaseUrl: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"

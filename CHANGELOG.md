@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.1] - 2026-04-24
+
+### Changed
+- Default FHIR base URL switched from `ngrok.headease.nl` to `data-source.gf-cumuluz-poc.headease.nl` across config, Helm values, docs, and examples
+
 ## [0.11.0] - 2026-04-23
 
 ### Added

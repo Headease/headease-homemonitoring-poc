@@ -223,7 +223,7 @@ curl "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/Endpoint?man
   --cert ldn-chain.crt --key private.key
 ```
 
-This returns the FHIR base URL of the data holder (e.g., `https://ngrok.headease.nl/fhir`).
+This returns the FHIR base URL of the data holder (e.g., `https://data-source.gf-cumuluz-poc.headease.nl/fhir`).
 
 Also retrieve the OAuth endpoint for the data holder:
 ```bash
@@ -249,7 +249,7 @@ Scope: `patient/*.rs`
 ### 4b. Search for the Patient
 
 ```bash
-curl -X POST https://ngrok.headease.nl/fhir/Patient/_search \
+curl -X POST https://data-source.gf-cumuluz-poc.headease.nl/fhir/Patient/_search \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "x-ura-identifier: <your-ura>" \
   -H "x-healthcareproviderroletype: doctor" \
@@ -263,7 +263,7 @@ curl -X POST https://ngrok.headease.nl/fhir/Patient/_search \
 ### 4c. Query Blood Pressure
 
 ```bash
-curl 'https://ngrok.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|85354-9&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
+curl 'https://data-source.gf-cumuluz-poc.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|85354-9&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
   -H "x-ura-identifier: <your-ura>" \
   -H "x-healthcareproviderroletype: doctor" \
   -H "x-dezi-identifier: <user-id>" \
@@ -277,7 +277,7 @@ LOINC `85354-9` = Blood pressure panel. The Observation contains components:
 ### 4d. Query Body Weight
 
 ```bash
-curl 'https://ngrok.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|29463-7&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
+curl 'https://data-source.gf-cumuluz-poc.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|29463-7&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
   -H "x-ura-identifier: <your-ura>" \
   -H "x-healthcareproviderroletype: doctor" \
   -H "x-dezi-identifier: <user-id>" \

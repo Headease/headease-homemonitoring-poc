@@ -10,7 +10,7 @@ Step-by-step script for HeadEase as **data holder** in the GF Proeftuin home mon
 Set these environment variables:
 
 ```bash
-export BASE_URL=https://data-source.gf-cumuluz-poc.headease.nl
+export BASE_URL=https://admin.gf-cumuluz-poc.headease.nl
 export CERT=certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt
 export KEY=certificates/headease_nvi_20260202_145627.key
 export URA=90000315

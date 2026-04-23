@@ -6,7 +6,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     # Our FHIR server base URL (ngrok)
-    fhir_base_url: str = "https://ngrok.headease.nl/fhir"
+    fhir_base_url: str = "https://data-source.gf-cumuluz-poc.headease.nl/fhir"
 
     # LRZa (adressering) base URL
     lrza_base_url: str = "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"

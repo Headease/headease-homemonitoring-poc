@@ -98,7 +98,7 @@ kubectl -n headease-homemonitoring rollout restart deployment headease-homemonit
 | `namespace` | `headease-homemonitoring` | Kubernetes namespace |
 | `image_repository` | `europe-west4-docker.pkg.dev/.../headease-homemonitoring` | Docker image |
 | `image_tag` | `latest` | Image tag |
-| `fhir_base_url` | `https://ngrok.headease.nl/fhir` | Public FHIR URL |
+| `fhir_base_url` | `https://data-source.gf-cumuluz-poc.headease.nl/fhir` | Public FHIR URL |
 | `ura_number` | `90000315` | Organization URA |
 | `organization_name` | `HeadEase` | Organization name |
 | `cert_secret_name` | `headease-homemonitoring-certs` | K8s Secret with certs |
