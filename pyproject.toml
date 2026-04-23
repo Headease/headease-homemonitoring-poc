@@ -12,6 +12,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "pysodium>=0.7",
     "PyJWT>=2.10",
+    "pyoprf>=0.9.3",
 ]
 
 [project.optional-dependencies]

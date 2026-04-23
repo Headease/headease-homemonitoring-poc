@@ -4,7 +4,7 @@ import base64
 import json
 import logging
 
-import pysodium
+import pyoprf
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
@@ -12,25 +12,6 @@ from app.config import settings
 from app.http_client import create_client
 
 logger = logging.getLogger("headease.pseudonymisation")
-
-
-def _oprf_blind(msg: bytes) -> tuple[bytes, bytes]:
-    """Blind a message using ristretto255 OPRF.
-
-    Equivalent to pyoprf.blind(): hash msg to ristretto255 point,
-    multiply by random scalar.
-
-    Returns (blind_factor, blinded_point).
-    """
-    # Hash message to a ristretto255 point
-    point = pysodium.crypto_core_ristretto255_from_hash(
-        pysodium.crypto_generichash(msg, outlen=64)
-    )
-    # Generate random scalar as blind factor
-    blind_factor = pysodium.crypto_core_ristretto255_scalar_random()
-    # Blind: point * scalar
-    blinded_point = pysodium.crypto_scalarmult_ristretto255(blind_factor, point)
-    return blind_factor, blinded_point
 
 
 def create_blinded_input(
@@ -60,7 +41,7 @@ def create_blinded_input(
     ).derive(pid)
     logger.info("HKDF pseudonym: %s", base64.urlsafe_b64encode(pseudonym).decode())
 
-    blind_factor, blinded_input = _oprf_blind(pseudonym)
+    blind_factor, blinded_input = pyoprf.blind(pseudonym)
 
     return (
         base64.urlsafe_b64encode(blind_factor).decode(),
