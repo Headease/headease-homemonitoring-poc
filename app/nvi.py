@@ -119,24 +119,16 @@ async def register_at_nvi(bsn: str = "004895708"):
 async def check_nvi_registration(bsn: str = "004895708"):
     """Pseudonymise a BSN and query the NVI to check if we are registered as data holder.
 
-    Uses GET /v1-poc/fhir/List with subject:identifier (the JWE pseudonym, not the full NVI identifier).
+    Uses GET /v1-poc/fhir/List with subject:identifier (the full NVI identifier as registered).
     """
-    import base64
-    import json
-
     nvi_identifier, _ = await request_pseudonym(bsn)
     token = await get_nvi_token()
-
-    # Extract just the JWE from the packaged NVI identifier
-    padded = nvi_identifier + "=" * (-len(nvi_identifier) % 4)
-    id_data = json.loads(base64.urlsafe_b64decode(padded))
-    pseudonym = id_data["evaluated_output"]
 
     async with create_client() as client:
         resp = await client.get(
             f"{settings.nvi_base_url}/v1-poc/fhir/List",
             params={
-                "subject:identifier": f"{NVI_IDENTIFIER_SYSTEM}|{pseudonym}",
+                "subject:identifier": f"{NVI_IDENTIFIER_SYSTEM}|{nvi_identifier}",
             },
             headers={"Authorization": f"Bearer {token}"},
         )
