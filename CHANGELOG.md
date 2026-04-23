@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-04-23
+
+### Added
+- Cloud SQL PostgreSQL (db-f1-micro) as HAPI backing database
+- VPC peering via `google_service_networking_connection` for private IP connectivity
+- Terraform-generated random password stored in K8s secret `hapi-db`
+- HAPI Helm deployment conditionally wires PostgreSQL from secret when `hapi.database.enabled`
+
+### Changed
+- HAPI uses Cloud SQL when deployed via Terraform; H2 embedded when via docker-compose
+- Chart version bumped to 0.7.0
+
+### Required
+- APIs: `sqladmin.googleapis.com`, `servicenetworking.googleapis.com`, `compute.googleapis.com`
+- IAM roles on deploy SA: `cloudsql.admin`, `servicenetworking.networksAdmin`
+
 ## [0.10.1] - 2026-04-23
 
 ### Changed

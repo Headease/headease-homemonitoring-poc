@@ -28,6 +28,27 @@ spec:
               value: UUID
             - name: hapi.fhir.tester_enabled
               value: "false"
+            {{- if .Values.hapi.database.enabled }}
+            - name: spring.datasource.driver-class-name
+              value: org.postgresql.Driver
+            - name: spring.jpa.properties.hibernate.dialect
+              value: ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect
+            - name: spring.datasource.url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.hapi.database.secretName }}
+                  key: jdbc-url
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.hapi.database.secretName }}
+                  key: username
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.hapi.database.secretName }}
+                  key: password
+            {{- end }}
           resources:
             requests:
               cpu: 200m

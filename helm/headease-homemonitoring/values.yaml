@@ -44,6 +44,10 @@ redis:
 hapi:
   enabled: true
   image: hapiproject/hapi:latest
+  # Use external PostgreSQL (e.g. Cloud SQL). Secret must have keys: jdbc-url, username, password
+  database:
+    enabled: false
+    secretName: ""
 
 resources:
   requests:

@@ -24,6 +24,12 @@ config:
 certificates:
   existingSecret: "${cert_secret_name}"
 
+hapi:
+  enabled: true
+  database:
+    enabled: true
+    secretName: "${hapi_db_secret}"
+
 resources:
   requests:
     cpu: 100m

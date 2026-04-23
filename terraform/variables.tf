@@ -37,7 +37,7 @@ variable "image_repository" {
 variable "image_tag" {
   description = "Docker image tag (should match pyproject.toml version)"
   type        = string
-  default     = "0.10.1"
+  default     = "0.11.0"
 }
 
 variable "base_domain" {
@@ -68,6 +68,12 @@ variable "letsencrypt_email" {
   description = "Email for Let's Encrypt certificate notifications"
   type        = string
   default     = "roland@headease.nl"
+}
+
+variable "db_tier" {
+  description = "Cloud SQL instance tier (smallest: db-f1-micro)"
+  type        = string
+  default     = "db-f1-micro"
 }
 
 variable "cert_secret_name" {

@@ -30,7 +30,12 @@ resource "helm_release" "headease_homemonitoring" {
     ura_number        = var.ura_number
     organization_name = var.organization_name
     cert_secret_name  = var.cert_secret_name
+    hapi_db_secret    = kubernetes_secret_v1.hapi_db.metadata[0].name
   })]
 
-  depends_on = [kubernetes_namespace_v1.headease, helm_release.nginx_ingress]
+  depends_on = [
+    kubernetes_namespace_v1.headease,
+    helm_release.nginx_ingress,
+    kubernetes_secret_v1.hapi_db,
+  ]
 }

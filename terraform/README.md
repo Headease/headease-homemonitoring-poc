@@ -27,7 +27,8 @@ gcloud auth application-default login
 gcloud config set project cumuluz-vws-hackathon-april-26
 
 # Enable required APIs
-gcloud services enable container.googleapis.com artifactregistry.googleapis.com
+gcloud services enable container.googleapis.com artifactregistry.googleapis.com \
+  sqladmin.googleapis.com servicenetworking.googleapis.com compute.googleapis.com
 
 # Create state bucket
 gsutil mb -p cumuluz-vws-hackathon-april-26 -l europe-west4 gs://cumuluz-vws-hackathon-april-26-tf-state
@@ -138,6 +139,14 @@ gcloud projects add-iam-policy-binding $PROJECT \
   --member="serviceAccount:$SA_EMAIL" \
   --role="roles/iam.serviceAccountUser"
 
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/cloudsql.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/servicenetworking.networksAdmin"
+
 # Create and download key
 gcloud iam service-accounts keys create github-deploy-key.json \
   --iam-account=$SA_EMAIL
@@ -160,6 +169,8 @@ gcloud iam service-accounts keys create github-deploy-key.json \
 | `roles/artifactregistry.writer` | Push Docker images |
 | `roles/storage.admin` | Access Terraform state bucket |
 | `roles/iam.serviceAccountUser` | Create resources as the service account |
+| `roles/cloudsql.admin` | Create/manage Cloud SQL instances |
+| `roles/servicenetworking.networksAdmin` | Set up VPC peering for Cloud SQL private IP |
 
 ## Tear down
 
