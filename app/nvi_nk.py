@@ -83,7 +83,7 @@ async def register_at_nvi_via_knooppunt(bsn: str = "004895708"):
     """Register localization records at the NVI via the nuts-knooppunt.
 
     The knooppunt handles pseudonymisation — we send plain BSNs.
-    Idempotent: deletes existing records for our source device before creating.
+    Treats 409 (already exists) as success.
     """
     headers = {
         "Content-Type": "application/fhir+json",
@@ -91,14 +91,6 @@ async def register_at_nvi_via_knooppunt(bsn: str = "004895708"):
     }
 
     async with httpx.AsyncClient(timeout=30) as client:
-        # Delete existing registrations for our source device
-        delete_resp = await client.delete(
-            f"{NK_INTERNAL_URL}/nvi/List",
-            params={"source:identifier": f"urn:ietf:rfc:3986|urn:uuid:{DEVICE_ID}"},
-            headers=_tenant_header(),
-        )
-
-        # Create List resources for each data category
         results = []
         for code, display in DATA_CATEGORIES:
             list_resource = _build_list_resource(bsn, code, display)
@@ -107,12 +99,18 @@ async def register_at_nvi_via_knooppunt(bsn: str = "004895708"):
                 json=list_resource,
                 headers=headers,
             )
-            results.append({"code": code, "status": resp.status_code, "response": resp.json()})
+            status = resp.status_code
+            # 409 = already registered, treat as success
+            result = {"code": code, "status": status}
+            if status == 409:
+                result["note"] = "already registered"
+            else:
+                result["response"] = resp.json()
+            results.append(result)
 
     return {
         "bsn": bsn,
         "via": "nuts-knooppunt",
-        "previous_deleted": delete_resp.status_code,
         "registered": results,
     }
 
