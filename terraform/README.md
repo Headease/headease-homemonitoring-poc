@@ -74,6 +74,8 @@ kubectl -n headease-homemonitoring create secret generic headease-homemonitoring
   --from-file=uzi-intermediate.cer=../certificates/gfmodules-test-uzi-external-intermediate.cer \
   --from-file=ldn.crt=../certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt \
   --from-file=ldn-chain.crt=../certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt \
+  --from-file=ldn-ca.crt=../certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt \
+  --from-file=uzi-ca.crt=../certificates/headease-certificates-proeftuin/headease-uzi-external-intermediate/uzi-ca.crt \
   --from-file=private.key=../certificates/headease_nvi_20260202_145627.key
 ```
 

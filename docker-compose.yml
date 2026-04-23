@@ -16,6 +16,7 @@ services:
       HEADEASE_LDN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt
       HEADEASE_LDN_CHAIN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt
       HEADEASE_LDN_CA_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt
+      HEADEASE_UZI_CA_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/uzi-ca.crt
     volumes:
       - ./certificates:/certs:ro
     depends_on:
@@ -39,6 +40,7 @@ services:
       HEADEASE_LDN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt
       HEADEASE_LDN_CHAIN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt
       HEADEASE_LDN_CA_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt
+      HEADEASE_UZI_CA_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/uzi-ca.crt
     volumes:
       - ./certificates:/certs:ro
     depends_on:
@@ -46,7 +48,7 @@ services:
       - nuts-knooppunt
 
   nuts-knooppunt:
-    image: ghcr.io/nuts-foundation/nuts-knooppunt:0.11.0
+    image: ghcr.io/nuts-foundation/nuts-knooppunt:proeftuin-compatibility
     ports:
       - "8080:8080"   # public
       - "8081:8081"   # internal
