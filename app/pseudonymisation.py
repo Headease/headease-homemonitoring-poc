@@ -29,7 +29,8 @@ def create_blinded_input(
     Returns (blind_factor_b64, blinded_input_b64).
     """
     info = f"{recipient_organization}|{recipient_scope}|v1".encode("utf-8")
-    pid = json.dumps(personal_identifier).encode("utf-8")
+    # RFC 8785 (JCS): canonical JSON with no whitespace between tokens
+    pid = json.dumps(personal_identifier, separators=(",", ":"), sort_keys=True).encode("utf-8")
     logger.info("HKDF info: %s", info.decode())
     logger.info("HKDF pid:  %s", pid.decode())
 

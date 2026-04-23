@@ -14,13 +14,18 @@ https://github.com/Headease/headease-homemonitoring-poc
 
 ---
 
-## Fix 1: JSON serialization must include spaces (blinding.go) — DONE
+## Fix 1: JSON serialization per RFC 8785 (blinding.go) — DONE
 
 **File:** `component/pseudonymisation/blinding.go` (around line 19)
 
-**Problem:** Go's `json.Marshal` produces compact JSON without spaces (`{"landCode":"NL",...}`), but the PRS reference implementation (Python) and the proeftuin PRS use JSON with spaces after `:` and `,` (`{"landCode": "NL", ...}`). Since this JSON string is the HKDF input, different serialization → different pseudonym → registrations can't be found.
+**Problem:** The JSON serialization of the personal identifier must follow [RFC 8785 (JSON Canonicalization Scheme)](https://www.rfc-editor.org/rfc/rfc8785): no whitespace, sorted keys. Go's `json.Marshal` produces this by default. The Python reference has been updated to match.
 
-**Fix applied:** Custom serialization that matches Python's `json.dumps` default (space after `:` and `,`).
+**Agreement:** All implementations use RFC 8785 canonical JSON for the HKDF input:
+```
+{"landCode":"NL","type":"BSN","value":"004895708"}
+```
+
+**Fix applied:** Go's `json.Marshal` already produces RFC 8785 compliant output — the original "add spaces" fix has been reverted.
 
 **Verified:** HKDF pseudonyms now match between Python reference and knooppunt.
 
