@@ -1,7 +1,13 @@
 FROM python:3.12-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc libsodium-dev libssl-dev git && \
+        gcc \
+        git \
+        libssl-dev  \
+        pkg-config \
+        libsodium-dev  \
+        ca-certificates \
+        build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /liboprf
