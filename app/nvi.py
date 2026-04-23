@@ -19,7 +19,14 @@ CUSTODIAN_EXT_URL = "http://minvws.github.io/generiekefuncties-docs/StructureDef
 DEVICE_ID = str(uuid.uuid5(uuid.NAMESPACE_URL, "headease-homemonitoring-poc"))
 
 
-def _build_list_resource(nvi_identifier: str) -> dict:
+# Data categories we publish for each patient
+DATA_CATEGORIES = [
+    ("Patient", "Patient"),
+    ("ObservationVitalSigns", "Observation (category: Vital Signs)"),
+]
+
+
+def _build_list_resource(nvi_identifier: str, code: str, display: str) -> dict:
     """Build a FHIR List resource for NVI localization."""
     return {
         "resourceType": "List",
@@ -40,8 +47,8 @@ def _build_list_resource(nvi_identifier: str) -> dict:
             "coding": [
                 {
                     "system": DATA_CATEGORIES_CS,
-                    "code": "Patient",
-                    "display": "Patient",
+                    "code": code,
+                    "display": display,
                 }
             ]
         },
@@ -90,20 +97,21 @@ async def register_at_nvi(bsn: str = "004895708"):
             headers={"Authorization": f"Bearer {token}"},
         )
 
-        # Create new List resource
-        list_resource = _build_list_resource(nvi_identifier)
-        resp = await client.post(
-            f"{settings.nvi_base_url}/v1-poc/fhir/List",
-            json=list_resource,
-            headers=headers,
-        )
-        result = resp.json()
+        # Create List resources for each data category
+        results = []
+        for code, display in DATA_CATEGORIES:
+            list_resource = _build_list_resource(nvi_identifier, code, display)
+            resp = await client.post(
+                f"{settings.nvi_base_url}/v1-poc/fhir/List",
+                json=list_resource,
+                headers=headers,
+            )
+            results.append({"code": code, "status": resp.status_code, "response": resp.json()})
 
     return {
-        "status": resp.status_code,
         "bsn": bsn,
         "previous_deleted": delete_resp.status_code,
-        "response": result,
+        "registered": results,
     }
 
 
