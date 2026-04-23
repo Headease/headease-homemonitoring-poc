@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2026-04-23
+
+### Added
+- Organization.endpoint references to both FHIR and OAuth Endpoints (JSON Patch)
+- Endpoint.managingOrganization includes both reference and identifier
+- LRZa cleanup script (`scripts/cleanup-lrza.sh`)
+- NVI check endpoint (`GET /admin/nvi-check`)
+
+### Fixed
+- Endpoint upsert searches by name instead of unsupported chained params
+- NVI check uses correct NVI_IDENTIFIER_SYSTEM
+
 ## [0.4.0] - 2026-04-23
 
 ### Changed
