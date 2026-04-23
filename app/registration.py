@@ -134,4 +134,26 @@ async def register_at_lrza():
             f"name={settings.organization_name} OAuth2 Endpoint",
         )
 
+        # Patch Organization.endpoint to reference both Endpoints
+        fhir_ep_id = results["fhir_endpoint"].get("id") or results["fhir_endpoint"]["resource"]["id"]
+        oauth_ep_id = results["oauth_endpoint"].get("id") or results["oauth_endpoint"]["resource"]["id"]
+
+        patch = [
+            {
+                "op": "replace",
+                "path": "/endpoint",
+                "value": [
+                    {"reference": f"Endpoint/{fhir_ep_id}"},
+                    {"reference": f"Endpoint/{oauth_ep_id}"},
+                ],
+            }
+        ]
+        patch_resp = await client.patch(
+            f"{settings.lrza_base_url}/Organization/{org_id}",
+            json=patch,
+            headers={"Content-Type": "application/json-patch+json"},
+        )
+        patch_resp.raise_for_status()
+        results["organization_endpoints_patch"] = {"status": patch_resp.status_code}
+
     return {"status": "registered", "results": results}
