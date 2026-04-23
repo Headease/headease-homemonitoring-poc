@@ -46,7 +46,7 @@ config:
   authn:
     minvws:
       tokenendpoint: "https://oauth.proeftuin.gf.irealisatie.nl/oauth/token"
-      tlscertfile: "/certs/ldn-chain.crt"
+      tlscertfile: "/certs/uzi-chain.crt"
       tlskeyfile: "/certs/private.key"
 
   # Addressing / mCSD — uses proeftuin LRZa

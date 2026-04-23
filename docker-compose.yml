@@ -55,7 +55,7 @@ services:
       KNPT_HTTP_PUBLIC_ADDRESS: ":8080"
       KNPT_HTTP_INTERNAL_ADDRESS: ":8081"
       KNPT_AUTHN_MINVWS_TOKENENDPOINT: "https://oauth.proeftuin.gf.irealisatie.nl/oauth/token"
-      KNPT_AUTHN_MINVWS_TLSCERTFILE: "/certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt"
+      KNPT_AUTHN_MINVWS_TLSCERTFILE: "/certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt"
       KNPT_AUTHN_MINVWS_TLSKEYFILE: "/certs/headease_nvi_20260202_145627.key"
       KNPT_MCSD_ADMIN_ROOT_FHIRBASEURL: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
       KNPT_PSEUDO_PRSURL: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
