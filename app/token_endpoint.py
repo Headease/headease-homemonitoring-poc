@@ -55,7 +55,8 @@ def _verify_x5c_chain(x5c: list[str], trusted_cas: list[x509.Certificate]) -> x5
 
     # Try to verify any cert in the chain against any trusted CA
     chain_valid = False
-    for cert in certs:
+    verification_attempts = []
+    for i, cert in enumerate(certs):
         for ca in trusted_cas:
             try:
                 ca.public_key().verify(
@@ -63,16 +64,19 @@ def _verify_x5c_chain(x5c: list[str], trusted_cas: list[x509.Certificate]) -> x5
                     cert.tbs_certificate_bytes,
                     cert.signature_hash_algorithm,
                 )
-                logger.info("Certificate chain verified: %s signed by CA %s", cert.subject, ca.subject)
+                logger.info("Certificate chain verified: x5c[%d] (%s) signed by CA (%s)", i, cert.subject.rfc4514_string(), ca.subject.rfc4514_string())
                 chain_valid = True
                 break
-            except Exception:
+            except Exception as e:
+                verification_attempts.append(f"x5c[{i}] subject={cert.subject.rfc4514_string()} issuer={cert.issuer.rfc4514_string()} vs CA {ca.subject.rfc4514_string()}: {type(e).__name__}")
                 continue
         if chain_valid:
             break
 
     if not chain_valid:
-        logger.error("Certificate chain not trusted. Leaf: %s. Tried %d CA(s)", leaf.subject, len(trusted_cas))
+        logger.error("Certificate chain not trusted. Leaf: %s. Tried %d CA(s)", leaf.subject.rfc4514_string(), len(trusted_cas))
+        for attempt in verification_attempts:
+            logger.error("  Verification failed: %s", attempt)
         raise HTTPException(status_code=401, detail="Certificate chain not trusted")
 
     # Check leaf cert is not expired
@@ -103,7 +107,11 @@ async def issue_token(
 
     The client assertion must be signed with a certificate trusted by the UZI or LDN CA.
     """
-    logger.info("Token request: grant_type=%s, scope=%s, target_audience=%s", grant_type, scope, target_audience)
+    logger.info("=" * 80)
+    logger.info("TOKEN REQUEST: grant_type=%s, scope=%s, target_audience=%s", grant_type, scope, target_audience)
+    logger.info("Headers: x-ura-identifier=%s, x-healthcareproviderroletype=%s, x-dezi-identifier=%s, x-dezi-roletype=%s",
+                x_ura_identifier, x_healthcareproviderroletype, x_dezi_identifier, x_dezi_roletype)
+    logger.info("client_assertion (full): %s", client_assertion)
 
     # Validate grant type
     if grant_type != "client_credentials":
@@ -118,6 +126,9 @@ async def issue_token(
         unverified_header = jwt.get_unverified_header(client_assertion)
         logger.info("JWT header: alg=%s, typ=%s, x5c=%d cert(s)",
                      unverified_header.get("alg"), unverified_header.get("typ"), len(unverified_header.get("x5c", [])))
+        # Log unverified claims for debugging
+        unverified_claims = jwt.decode(client_assertion, options={"verify_signature": False})
+        logger.info("JWT claims (unverified): %s", unverified_claims)
     except jwt.DecodeError as e:
         logger.error("Invalid JWT header: %s", e)
         raise HTTPException(status_code=401, detail=f"Invalid JWT: {e}")
