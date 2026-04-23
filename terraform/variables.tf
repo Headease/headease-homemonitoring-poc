@@ -71,9 +71,9 @@ variable "letsencrypt_email" {
 }
 
 variable "db_tier" {
-  description = "Cloud SQL instance tier (smallest: db-f1-micro)"
+  description = "Cloud SQL instance tier (db-f1-micro has slow startup, db-g1-small is faster)"
   type        = string
-  default     = "db-f1-micro"
+  default     = "db-g1-small"
 }
 
 variable "cert_secret_name" {
