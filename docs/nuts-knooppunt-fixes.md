@@ -38,15 +38,31 @@ https://github.com/Headease/headease-homemonitoring-poc
 
 ---
 
-## Fix 3: `encryptedPersonalId` encoding in PRS request (component.go) — DONE
+## Fix 3: `encryptedPersonalId` encoding in PRS request (component.go) — TODO
 
 **File:** `component/pseudonymisation/component.go` (around line 119-123)
 
-**Problem:** The `EncryptedPersonalID` field was declared as `[]byte`, which Go's `json.Marshal` encodes as **base64 standard encoding** (alphabet `A-Za-z0-9+/`). The PRS expects **base64url encoding** (alphabet `A-Za-z0-9-_`).
+**Problem:** The `EncryptedPersonalID` field is declared as `[]byte`, which Go's `json.Marshal` encodes as **base64 standard encoding** (alphabet `A-Za-z0-9+/`). The PRS expects **base64url encoding** (alphabet `A-Za-z0-9-_`).
 
-**Fix applied:** Changed field to `string` with explicit `base64.RawURLEncoding.EncodeToString()`.
+**Proposed fix:** Change field to `string` and encode explicitly with base64url:
+```go
+type prsEvaluateRequest struct {
+    RecipientOrganization string `json:"recipientOrganization"`
+    RecipientScope        string `json:"recipientScope"`
+    EncryptedPersonalID   string `json:"encryptedPersonalId"`
+}
+```
 
-**Verified:** The PRS explicitly validates this field as base64url (see [models.py](https://github.com/minvws/gfmodules-pseudoniemendienst/blob/main/oprf/models.py)). Before the fix, sending base64 standard encoding caused `400 Bad Request: "Unable to evaluate blind"`.
+And in `callPRSEvaluate`, encode the blinded input:
+```go
+requestBody := prsEvaluateRequest{
+    RecipientOrganization: "ura:" + recipientURA,
+    RecipientScope:        scope,
+    EncryptedPersonalID:   base64.RawURLEncoding.EncodeToString(blindedInputData),
+}
+```
+
+**Evidence:** The PRS explicitly validates this field as base64url (see [models.py](https://github.com/minvws/gfmodules-pseudoniemendienst/blob/main/oprf/models.py)). Sending base64 standard encoding (with `+/`) will cause `400 Bad Request: "Unable to evaluate blind"` when the blinded bytes happen to contain values that produce `+` or `/` characters (~50% of requests).
 
 ---
 
