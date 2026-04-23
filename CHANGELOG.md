@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-04-23
+
+### Changed
+- Switched from custom pysodium OPRF blinding to `pyoprf.blind` (liboprf) for correct RFC-compatible pseudonyms
+- Dockerfile builds liboprf from source for pyoprf compatibility
+
+### Fixed
+- Pseudonyms now match the reference implementation, making NVI registrations queryable
+
 ## [0.3.2] - 2026-04-23
 
 ### Fixed
