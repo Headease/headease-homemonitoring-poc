@@ -1,0 +1,56 @@
+{{- if .Values.hapi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "headease.fullname" . }}-hapi
+  labels:
+    {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: hapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "headease.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: hapi
+  template:
+    metadata:
+      labels:
+        {{- include "headease.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: hapi
+    spec:
+      containers:
+        - name: hapi
+          image: {{ .Values.hapi.image }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: hapi.fhir.server_id_strategy
+              value: UUID
+            - name: hapi.fhir.tester_enabled
+              value: "false"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hapi-fhir
+  labels:
+    {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: hapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "headease.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: hapi
+{{- end }}

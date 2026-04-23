@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     ldn_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt")
     uzi_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-uzi-external-intermediate/uzi-ca.crt")
 
+    # HAPI FHIR server (internal)
+    hapi_base_url: str = "http://hapi-fhir:8080/fhir"
+
     # Nuts-knooppunt internal API host
     nk_host: str = "nuts-knooppunt"
 

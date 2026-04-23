@@ -1,6 +1,8 @@
 """Combined app — runs both FHIR and Admin services (for local development)."""
 
+import asyncio
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Query
 
@@ -12,9 +14,17 @@ from app.nvi import router as nvi_router
 from app.nvi_nk import router as nvi_nk_router
 from app.oauth import get_nvi_token, get_prs_token, get_token
 from app.registration import router as registration_router
+from app.seeder import seed_hapi
 from app.token_endpoint import router as token_router
 
-app = FastAPI(title="HeadEase Home Monitoring PoC", version="0.5.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(seed_hapi())
+    yield
+
+
+app = FastAPI(title="HeadEase Home Monitoring PoC", version="0.10.0", lifespan=lifespan)
 
 app.include_router(fhir_router, prefix="/fhir")
 app.include_router(registration_router, prefix="/admin")

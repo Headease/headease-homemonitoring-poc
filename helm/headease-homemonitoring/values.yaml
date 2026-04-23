@@ -41,6 +41,10 @@ redis:
   enabled: true
   image: redis:7-alpine
 
+hapi:
+  enabled: true
+  image: hapiproject/hapi:latest
+
 resources:
   requests:
     cpu: 100m

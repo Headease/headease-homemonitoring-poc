@@ -22,3 +22,4 @@ data:
   HEADEASE_LDN_CA_CERT: "/certs/ldn-ca.crt"
   HEADEASE_UZI_CA_CERT: "/certs/uzi-ca.crt"
   HEADEASE_REDIS_URL: "redis://localhost:6379"
+  HEADEASE_HAPI_BASE_URL: "http://hapi-fhir:8080/fhir"

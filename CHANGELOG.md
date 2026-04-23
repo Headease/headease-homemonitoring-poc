@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-04-23
+
+### Changed
+- Replaced custom in-memory FHIR implementation with a proxy to HAPI FHIR
+- Bearer token check at the proxy; HAPI handles all FHIR logic, search, and persistence
+- Sample data seeded into HAPI on startup (idempotent)
+
+### Added
+- HAPI FHIR server to docker-compose (`hapi-fhir` service on port 8082)
+- HAPI FHIR Deployment + Service in Helm chart (`hapi.enabled`)
+- Helm chart version bumped to 0.6.0 (added HAPI deployment)
+
 ## [0.9.0] - 2026-04-23
 
 ### Added
