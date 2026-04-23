@@ -30,7 +30,9 @@ cp .env.example .env   # edit as needed
 docker compose up --build
 ```
 
-This builds the app image (includes liboprf), starts Redis, mounts certificates, and runs on `http://localhost:8000`.
+This starts two services + Redis:
+- **FHIR service** — `http://localhost:8000` (FHIR endpoints + `/oauth2/token`)
+- **Admin service** — `http://localhost:8001` (registration, NVI, proeftuin tokens)
 
 To stop: `docker compose down`
 

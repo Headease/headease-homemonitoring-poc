@@ -1,9 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "headease.fullname" . }}
+  name: {{ include "headease.fullname" . }}-fhir
   labels:
     {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: fhir
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -13,3 +14,22 @@ spec:
       name: http
   selector:
     {{- include "headease.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: fhir
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "headease.fullname" . }}-admin
+  labels:
+    {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: admin
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "headease.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: admin

@@ -38,6 +38,8 @@ RUN ldconfig
 
 COPY app/ app/
 
+# APP_MODULE: app.main_fhir:app, app.main_admin:app, or app.main:app (combined)
+ENV APP_MODULE=app.main:app
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn $APP_MODULE --host 0.0.0.0 --port 8000

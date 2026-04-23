@@ -1,4 +1,4 @@
-"""Combined app — runs both FHIR and Admin services (for local development)."""
+"""Admin service — registration, NVI management, and proeftuin token helper."""
 
 import logging
 
@@ -7,23 +7,19 @@ from fastapi import FastAPI, Query
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("headease.http").setLevel(logging.INFO)
 
-from app.fhir_routes import router as fhir_router
 from app.nvi import router as nvi_router
 from app.oauth import get_nvi_token, get_prs_token, get_token
 from app.registration import router as registration_router
-from app.token_endpoint import router as token_router
 
-app = FastAPI(title="HeadEase Home Monitoring PoC", version="0.5.0")
+app = FastAPI(title="HeadEase Admin Service", version="0.5.0")
 
-app.include_router(fhir_router, prefix="/fhir")
 app.include_router(registration_router, prefix="/admin")
 app.include_router(nvi_router, prefix="/admin")
-app.include_router(token_router)
 
 
 @app.get("/")
 async def root():
-    return {"status": "ok", "service": "HeadEase Home Monitoring Data Holder"}
+    return {"status": "ok", "service": "HeadEase Admin"}
 
 
 @app.get("/admin/token")

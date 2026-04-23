@@ -1,23 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "headease.fullname" . }}
+  name: {{ include "headease.fullname" . }}-fhir
   labels:
     {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: fhir
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "headease.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: fhir
   template:
     metadata:
       labels:
         {{- include "headease.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: fhir
     spec:
       containers:
-        - name: {{ .Chart.Name }}
+        - name: fhir
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: APP_MODULE
+              value: "app.main_fhir:app"
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -55,6 +61,60 @@ spec:
               cpu: 100m
               memory: 128Mi
         {{- end }}
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ include "headease.certSecretName" . }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "headease.fullname" . }}-admin
+  labels:
+    {{- include "headease.labels" . | nindent 4 }}
+    app.kubernetes.io/component: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "headease.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: admin
+  template:
+    metadata:
+      labels:
+        {{- include "headease.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: admin
+    spec:
+      containers:
+        - name: admin
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: APP_MODULE
+              value: "app.main_admin:app"
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "headease.fullname" . }}-config
+          volumeMounts:
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
       volumes:
         - name: certs
           secret:

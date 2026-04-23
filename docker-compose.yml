@@ -1,5 +1,5 @@
 services:
-  app:
+  fhir:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,6 +7,29 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
+      APP_MODULE: app.main_fhir:app
+      HEADEASE_REDIS_URL: redis://redis:6379
+      HEADEASE_CLIENT_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt
+      HEADEASE_CLIENT_KEY: /certs/headease_nvi_20260202_145627.key
+      HEADEASE_UZI_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi.crt
+      HEADEASE_UZI_INTERMEDIATE_CERT: /certs/gfmodules-test-uzi-external-intermediate.cer
+      HEADEASE_LDN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt
+      HEADEASE_LDN_CHAIN_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt
+      HEADEASE_LDN_CA_CERT: /certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt
+    volumes:
+      - ./certificates:/certs:ro
+    depends_on:
+      - redis
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    env_file: .env
+    environment:
+      APP_MODULE: app.main_admin:app
       HEADEASE_REDIS_URL: redis://redis:6379
       HEADEASE_CLIENT_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt
       HEADEASE_CLIENT_KEY: /certs/headease_nvi_20260202_145627.key
@@ -22,5 +45,3 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"

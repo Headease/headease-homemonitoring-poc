@@ -23,7 +23,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "headease.fullname" . }}
+                name: {{ include "headease.fullname" . }}-fhir
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}
