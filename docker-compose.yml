@@ -31,6 +31,7 @@ services:
     environment:
       APP_MODULE: app.main_admin:app
       HEADEASE_REDIS_URL: redis://redis:6379
+      HEADEASE_NK_HOST: nuts-knooppunt
       HEADEASE_CLIENT_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt
       HEADEASE_CLIENT_KEY: /certs/headease_nvi_20260202_145627.key
       HEADEASE_UZI_CERT: /certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi.crt
@@ -42,6 +43,26 @@ services:
       - ./certificates:/certs:ro
     depends_on:
       - redis
+      - nuts-knooppunt
+
+  nuts-knooppunt:
+    image: ghcr.io/nuts-foundation/nuts-knooppunt:0.11.0
+    ports:
+      - "8080:8080"   # public
+      - "8081:8081"   # internal
+    environment:
+      KNPT_STRICTMODE: "false"
+      KNPT_HTTP_PUBLIC_ADDRESS: ":8080"
+      KNPT_HTTP_INTERNAL_ADDRESS: ":8081"
+      KNPT_AUTHN_MINVWS_TOKENENDPOINT: "https://oauth.proeftuin.gf.irealisatie.nl/oauth/token"
+      KNPT_AUTHN_MINVWS_TLSCERTFILE: "/certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt"
+      KNPT_AUTHN_MINVWS_TLSKEYFILE: "/certs/headease_nvi_20260202_145627.key"
+      KNPT_MCSD_ADMIN_ROOT_FHIRBASEURL: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
+      KNPT_PSEUDO_PRSURL: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
+      KNPT_NVI_BASEURL: "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir"
+      KNPT_NVI_AUDIENCE: "90000901"
+    volumes:
+      - ./certificates:/certs:ro
 
   redis:
     image: redis:7-alpine
