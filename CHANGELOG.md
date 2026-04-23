@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.2] - 2026-04-24
+
+### Fixed
+- Cloud SQL switched to public IP with SSL required and authorized networks = 0.0.0.0/0
+- VPC peering private IP approach doesn't route from GKE alias-IP pods without extra peering config; public IP is simpler for a PoC
+
 ## [0.11.1] - 2026-04-24
 
 ### Changed

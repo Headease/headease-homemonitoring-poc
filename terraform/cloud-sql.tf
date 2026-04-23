@@ -1,23 +1,3 @@
-data "google_compute_network" "default" {
-  name = "default"
-}
-
-# Reserved private IP range for Cloud SQL peering
-resource "google_compute_global_address" "private_ip_range" {
-  name          = "${var.cluster_name}-sql-private-ip-range"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.default.id
-}
-
-# VPC peering for Cloud SQL private connectivity
-resource "google_service_networking_connection" "private_vpc_connection" {
-  network                 = data.google_compute_network.default.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_range.name]
-}
-
 resource "google_sql_database_instance" "hapi" {
   name                = "${var.cluster_name}-hapi-db"
   database_version    = "POSTGRES_17"
@@ -29,10 +9,15 @@ resource "google_sql_database_instance" "hapi" {
     edition           = "ENTERPRISE"
     availability_type = "ZONAL"
 
+    # PoC: public IP with SSL required and open authorized networks.
+    # Production would use private IP via VPC peering with a GKE-native peering config.
     ip_configuration {
-      ipv4_enabled    = false
-      private_network = data.google_compute_network.default.id
-      ssl_mode        = "ENCRYPTED_ONLY"
+      ipv4_enabled = true
+      ssl_mode     = "ENCRYPTED_ONLY"
+      authorized_networks {
+        name  = "allow-all"
+        value = "0.0.0.0/0"
+      }
     }
 
     backup_configuration {
@@ -52,7 +37,6 @@ resource "google_sql_database_instance" "hapi" {
     }
   }
 
-  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
 resource "google_sql_database" "hapi" {
@@ -78,7 +62,7 @@ resource "kubernetes_secret_v1" "hapi_db" {
   }
 
   data = {
-    jdbc-url = "jdbc:postgresql://${google_sql_database_instance.hapi.private_ip_address}:5432/${google_sql_database.hapi.name}?sslmode=require"
+    jdbc-url = "jdbc:postgresql://${google_sql_database_instance.hapi.public_ip_address}:5432/${google_sql_database.hapi.name}?sslmode=require"
     username = google_sql_user.hapi.name
     password = random_password.hapi_db.result
   }
