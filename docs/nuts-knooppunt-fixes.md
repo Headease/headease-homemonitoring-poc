@@ -103,7 +103,7 @@ requestBody := prsEvaluateRequest{
 }
 ```
 
-**Impact:** Different encoding may cause the PRS to evaluate differently, producing non-matching pseudonyms.
+**Impact:** The PRS explicitly validates this field as base64url (see [models.py](https://github.com/minvws/gfmodules-pseudoniemendienst/blob/main/oprf/models.py)). Sending base64 standard encoding (with `+/`) causes `400 Bad Request: "Unable to evaluate blind"`.
 
 ---
 
