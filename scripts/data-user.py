@@ -249,6 +249,16 @@ async def step5_query_patient_data(fhir_endpoint: str, token: str, bsn: str) -> 
         result["patient"] = patient
         print(f"      Patient/{patient_id}")
 
+        def _filter_by_code(bundle: dict, code: str) -> list[dict]:
+            """Return observations matching the given LOINC code, newest first."""
+            out = []
+            for entry in bundle.get("entry", []):
+                obs = entry.get("resource", {})
+                if any(c.get("code") == code for c in obs.get("code", {}).get("coding", [])):
+                    out.append(obs)
+            out.sort(key=lambda o: o.get("effectiveDateTime", ""), reverse=True)
+            return out
+
         # 5B: Blood pressure
         resp = await client.get(
             f"{fhir_endpoint}/Observation/$lastn",
@@ -258,11 +268,10 @@ async def step5_query_patient_data(fhir_endpoint: str, token: str, bsn: str) -> 
         if resp.status_code == 200:
             bp = resp.json()
             result["blood_pressure"] = bp
-            total = bp.get("total", 0)
-            print(f"      Blood pressure observations: {total}")
-            if total:
-                obs = bp["entry"][0]["resource"]
-                components = obs.get("component", [])
+            bp_obs = _filter_by_code(bp, "85354-9")
+            print(f"      Blood pressure observations: {len(bp_obs)}")
+            if bp_obs:
+                components = bp_obs[0].get("component", [])
                 sys_val = dia_val = None
                 for c in components:
                     code = c["code"]["coding"][0]["code"]
@@ -282,11 +291,10 @@ async def step5_query_patient_data(fhir_endpoint: str, token: str, bsn: str) -> 
         if resp.status_code == 200:
             wt = resp.json()
             result["body_weight"] = wt
-            total = wt.get("total", 0)
-            print(f"      Body weight observations:    {total}")
-            if total:
-                obs = wt["entry"][0]["resource"]
-                val = obs["valueQuantity"]["value"]
+            wt_obs = _filter_by_code(wt, "29463-7")
+            print(f"      Body weight observations:    {len(wt_obs)}")
+            if wt_obs:
+                val = wt_obs[0].get("valueQuantity", {}).get("value")
                 print(f"        Latest: {val} kg")
 
     return result
