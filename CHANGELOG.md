@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-04-23
+
+### Changed
+- Register both `Patient` and `ObservationVitalSigns` data categories at the NVI
+- NVI check query uses `nvi-pseudonym` NamingSystem for `subject:identifier`
+- Updated DATA-USER-GUIDE with correct NVI query system and both data categories
+
 ## [0.3.0] - 2026-04-23
 
 ### Added

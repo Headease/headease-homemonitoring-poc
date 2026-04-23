@@ -79,6 +79,8 @@ The version is defined in `pyproject.toml` and used as the Docker image tag. Whe
 2. `pyproject.toml` — bump the `version` field
 3. `terraform/variables.tf` — update the `image_tag` default to match
 
+The Helm chart version (`helm/headease-homemonitoring/Chart.yaml`) is independent — only bump it when the Helm templates themselves change.
+
 The GitHub Actions workflow reads the version from `pyproject.toml` and tags the Docker image accordingly. On push to `main`, the image is built and deployed automatically.
 
 ## Reference
