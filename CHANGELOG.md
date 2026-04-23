@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-04-23
+
+### Added
+- nuts-knooppunt Helm chart deployment via Terraform (OCI chart v0.11.0)
+- Configured with mTLS certs, OAuth, LRZa, PRS, and NVI proeftuin services
+- NUTS node, HAPI FHIR, PEP, mock-vc-issuer, Jaeger all disabled
+
 ## [0.6.0] - 2026-04-23
 
 ### Added
