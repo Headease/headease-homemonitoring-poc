@@ -140,7 +140,7 @@ async def register_at_lrza():
 
         patch = [
             {
-                "op": "replace",
+                "op": "add",
                 "path": "/endpoint",
                 "value": [
                     {"reference": f"Endpoint/{fhir_ep_id}"},
