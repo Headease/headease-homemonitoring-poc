@@ -13,10 +13,11 @@ spec:
   {{- end }}
   tls:
     - hosts:
-        - {{ .Values.ingress.host }}
+        - {{ .Values.ingress.fhirHost }}
+        - {{ .Values.ingress.adminHost }}
       secretName: {{ include "headease.fullname" . }}-tls
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ .Values.ingress.fhirHost }}
       http:
         paths:
           - path: /
@@ -24,6 +25,16 @@ spec:
             backend:
               service:
                 name: {{ include "headease.fullname" . }}-fhir
+                port:
+                  number: {{ .Values.service.port }}
+    - host: {{ .Values.ingress.adminHost }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "headease.fullname" . }}-admin
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}

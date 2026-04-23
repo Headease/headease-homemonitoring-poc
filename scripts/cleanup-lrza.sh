@@ -52,7 +52,7 @@ if [ -z "$ORG_IDS" ]; then
 else
     for id in $ORG_IDS; do
         echo "  Deleting Organization/$id..."
-        echo $CURL -X DELETE "$BASE/Organization/$id" -o /dev/null -w "  HTTP %{http_code}\n"
+        $CURL -X DELETE "$BASE/Organization/$id" -o /dev/null -w "  HTTP %{http_code}\n"
     done
 fi
 

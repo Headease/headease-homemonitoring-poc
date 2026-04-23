@@ -12,8 +12,8 @@ service:
 ingress:
   enabled: false
   className: nginx
-  host: ngrok.headease.nl
-  tls: []
+  fhirHost: data-source.example.com
+  adminHost: admin.example.com
 
 config:
   fhirBaseUrl: "https://ngrok.headease.nl/fhir"

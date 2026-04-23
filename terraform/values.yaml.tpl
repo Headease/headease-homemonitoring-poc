@@ -8,7 +8,8 @@ image:
 ingress:
   enabled: true
   className: nginx
-  host: "${host}"
+  fhirHost: "${fhir_host}"
+  adminHost: "${admin_host}"
 
 config:
   fhirBaseUrl: "${fhir_base_url}"

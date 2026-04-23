@@ -6,7 +6,7 @@ resource "helm_release" "nuts_knooppunt" {
   namespace  = kubernetes_namespace_v1.headease.metadata[0].name
 
   values = [templatefile("${path.module}/nuts-knooppunt-values.yaml.tpl", {
-    host = var.host
+    base_domain = var.base_domain
   })]
 
   depends_on = [kubernetes_namespace_v1.headease]

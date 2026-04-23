@@ -37,17 +37,17 @@ variable "image_repository" {
 variable "image_tag" {
   description = "Docker image tag (should match pyproject.toml version)"
   type        = string
-  default     = "0.8.0"
+  default     = "0.9.0"
 }
 
-variable "host" {
-  description = "Ingress hostname"
+variable "base_domain" {
+  description = "Base domain for all services"
   type        = string
-  default     = "data-source.gf-cumuluz-poc.headease.nl"
+  default     = "gf-cumuluz-poc.headease.nl"
 }
 
 variable "fhir_base_url" {
-  description = "Public FHIR base URL (derived from host)"
+  description = "Public FHIR base URL (derived from base_domain)"
   type        = string
   default     = ""
 }

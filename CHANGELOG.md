@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2026-04-23
+
+### Added
+- Admin ingress at `admin.<base_domain>` (separate from FHIR service)
+- `base_domain` variable replaces `host` — derives `data-source.` and `admin.` subdomains
+
+### Changed
+- FHIR service at `data-source.<base_domain>`, admin at `admin.<base_domain>`
+- Ingress serves both hosts with shared TLS certificate
+- Helm chart version bumped to 0.5.0
+
 ## [0.8.0] - 2026-04-23
 
 ### Added
