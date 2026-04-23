@@ -5,6 +5,8 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 
+from app.token_store import get_token_context
+
 router = APIRouter()
 
 REQUIRED_HEADERS = [
@@ -16,12 +18,23 @@ REQUIRED_HEADERS = [
 
 
 async def verify_authorization(request: Request):
-    """Verify required authorization headers are present. Mitz consent is assumed for now."""
+    """Verify authorization via Bearer token (Redis) or fallback to required headers."""
+    auth = request.headers.get("authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth[7:]
+        context = await get_token_context(token)
+        if context is None:
+            raise HTTPException(status_code=401, detail="Invalid or expired Bearer token")
+        # Token is valid — context contains the caller's identity
+        request.state.token_context = context
+        return
+
+    # Fallback: check headers directly (for backward compatibility / testing)
     missing = [h for h in REQUIRED_HEADERS if not request.headers.get(h)]
     if missing:
         raise HTTPException(
             status_code=403,
-            detail=f"Missing required headers: {', '.join(missing)}",
+            detail=f"Missing required headers or Bearer token: {', '.join(missing)}",
         )
 
 # In-memory store of sample data (hackathon PoC)

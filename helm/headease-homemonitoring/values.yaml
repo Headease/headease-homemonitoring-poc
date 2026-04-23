@@ -37,6 +37,10 @@ certificates:
   ldnChainCert: ""
   privateKey: ""
 
+redis:
+  enabled: true
+  image: redis:7-alpine
+
 resources:
   requests:
     cpu: 100m

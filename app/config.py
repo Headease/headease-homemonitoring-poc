@@ -35,6 +35,12 @@ class Settings(BaseSettings):
     # LDN cert: used for mTLS connections (thumbprint in JWT cnf)
     ldn_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt")
     ldn_chain_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt")
+    # Trusted LDN CA for validating incoming client assertions
+    ldn_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt")
+
+    # Redis
+    redis_url: str = "redis://localhost:6379"
+    token_ttl: int = 3600
 
     model_config = {"env_prefix": "HEADEASE_", "env_file": ".env"}
 
@@ -64,6 +70,10 @@ class Settings(BaseSettings):
     @property
     def ldn_chain_cert_path(self) -> Path:
         return self._resolve(self.ldn_chain_cert)
+
+    @property
+    def ldn_ca_cert_path(self) -> Path:
+        return self._resolve(self.ldn_ca_cert)
 
 
 settings = Settings()
