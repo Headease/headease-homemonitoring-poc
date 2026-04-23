@@ -6,6 +6,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/nuts-foundation/nuts-knooppunt
   pullPolicy: IfNotPresent
+  tag: "0.11.0"
 
 # Disable sub-charts we don't need
 fhir:
@@ -19,28 +20,49 @@ mock-vc-issuer:
 jaeger:
   enabled: false
 
+# Mount our certificates
+extraVolumes:
+  - name: certs
+    secret:
+      secretName: headease-homemonitoring-certs
+
+extraVolumeMounts:
+  - name: certs
+    mountPath: /certs
+    readOnly: true
+
 # Knooppunt application configuration
 config:
+  strictmode: false
+
   # HTTP interface
   http:
-    internal:
-      address: ":1323"
     public:
-      address: ":1324"
+      address: ":8080"
+    internal:
+      address: ":8081"
 
-  # mCSD (Care Services Directory) — uses our LRZa registration
+  # Authentication to MinVWS proeftuin services (mTLS + OAuth)
+  authn:
+    minvws:
+      tokenendpoint: "https://oauth.proeftuin.gf.irealisatie.nl/oauth/token"
+      tlscertfile: "/certs/ldn-chain.crt"
+      tlskeyfile: "/certs/private.key"
+
+  # Addressing / mCSD — uses proeftuin LRZa
   mcsd:
-    fhirBaseUrl: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
+    admin:
+      root:
+        fhirbaseurl: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
 
   # Pseudonymization — uses proeftuin PRS
-  pseudonymization:
-    enabled: true
-    prsBaseUrl: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
+  pseudo:
+    prsurl: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
 
   # NVI (Nationale Verwijsindex)
   nvi:
-    enabled: true
-    baseUrl: "https://nvi.proeftuin.gf.irealisatie.nl"
+    baseurl: "https://nvi.proeftuin.gf.irealisatie.nl"
+    audience: "90000901"
 
 resources:
   requests:
