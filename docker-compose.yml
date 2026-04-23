@@ -63,11 +63,14 @@ services:
       KNPT_AUTHN_MINVWS_TLSCERTFILE: "/certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt"
       KNPT_AUTHN_MINVWS_TLSKEYFILE: "/certs/headease_nvi_20260202_145627.key"
       KNPT_MCSD_ADMIN_ROOT_FHIRBASEURL: "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir"
+      KNPT_MCSD_QUERY_FHIRBASEURL: "http://hapi-fhir:8080/fhir"
       KNPT_PSEUDO_PRSURL: "https://pseudoniemendienst.proeftuin.gf.irealisatie.nl"
       KNPT_NVI_BASEURL: "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir"
       KNPT_NVI_AUDIENCE: "90000901"
     volumes:
       - ./certificates:/certs:ro
+    depends_on:
+      - hapi-fhir
 
   hapi-fhir:
     image: hapiproject/hapi:latest
@@ -76,6 +79,13 @@ services:
     environment:
       hapi.fhir.server_id_strategy: UUID
       hapi.fhir.tester_enabled: "false"
+      # Allow Endpoints to reference our ngrok/local URLs in Organizations
+      hapi.fhir.store_meta_source_information: SOURCE_URI
+    volumes:
+      - hapi-data:/usr/local/tomcat/target
 
   redis:
     image: redis:7-alpine
+
+volumes:
+  hapi-data:
