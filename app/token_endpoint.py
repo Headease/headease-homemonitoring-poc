@@ -6,6 +6,7 @@ import time
 
 import jwt
 from cryptography import x509
+from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
 from cryptography.hazmat.primitives.serialization import Encoding
 from fastapi import APIRouter, Form, Header, HTTPException
 
@@ -15,6 +16,30 @@ from app.token_store import store_token
 logger = logging.getLogger("headease.token_endpoint")
 
 router = APIRouter()
+
+
+def _verify_cert_signed_by(cert: x509.Certificate, issuer: x509.Certificate) -> bool:
+    """Check whether cert was signed by issuer, handling both RSA and ECDSA keys."""
+    pk = issuer.public_key()
+    try:
+        if isinstance(pk, rsa.RSAPublicKey):
+            pk.verify(
+                cert.signature,
+                cert.tbs_certificate_bytes,
+                padding.PKCS1v15(),
+                cert.signature_hash_algorithm,
+            )
+        elif isinstance(pk, ec.EllipticCurvePublicKey):
+            pk.verify(
+                cert.signature,
+                cert.tbs_certificate_bytes,
+                ec.ECDSA(cert.signature_hash_algorithm),
+            )
+        else:
+            return False
+        return True
+    except Exception:
+        return False
 
 
 def _load_trusted_cas() -> list[x509.Certificate]:
@@ -53,31 +78,34 @@ def _verify_x5c_chain(x5c: list[str], trusted_cas: list[x509.Certificate]) -> x5
 
     leaf = certs[0]
 
-    # Try to verify any cert in the chain against any trusted CA
+    # Walk the chain: each cert must be signed by the next, and the last must chain to a trusted CA
     chain_valid = False
-    verification_attempts = []
-    for i, cert in enumerate(certs):
-        for ca in trusted_cas:
-            try:
-                ca.public_key().verify(
-                    cert.signature,
-                    cert.tbs_certificate_bytes,
-                    cert.signature_hash_algorithm,
-                )
-                logger.info("Certificate chain verified: x5c[%d] (%s) signed by CA (%s)", i, cert.subject.rfc4514_string(), ca.subject.rfc4514_string())
-                chain_valid = True
-                break
-            except Exception as e:
-                verification_attempts.append(f"x5c[{i}] subject={cert.subject.rfc4514_string()} issuer={cert.issuer.rfc4514_string()} vs CA {ca.subject.rfc4514_string()}: {type(e).__name__}")
-                continue
-        if chain_valid:
+    for i in range(len(certs) - 1):
+        child, parent = certs[i], certs[i + 1]
+        if not _verify_cert_signed_by(child, parent):
+            logger.error("Chain link broken: x5c[%d] (%s) NOT signed by x5c[%d] (%s)",
+                         i, child.subject.rfc4514_string(), i + 1, parent.subject.rfc4514_string())
+            raise HTTPException(status_code=401, detail=f"Chain link broken at x5c[{i}]")
+        logger.info("Chain link OK: x5c[%d] signed by x5c[%d]", i, i + 1)
+
+    # The last cert must be signed by a trusted CA (or be one)
+    top = certs[-1]
+    for ca in trusted_cas:
+        if top.subject == ca.subject and _verify_cert_signed_by(top, ca):
+            logger.info("Top of chain (%s) matches trusted CA", top.subject.rfc4514_string())
+            chain_valid = True
+            break
+        if _verify_cert_signed_by(top, ca):
+            logger.info("Top of chain (%s) signed by trusted CA (%s)", top.subject.rfc4514_string(), ca.subject.rfc4514_string())
+            chain_valid = True
             break
 
     if not chain_valid:
-        logger.error("Certificate chain not trusted. Leaf: %s. Tried %d CA(s)", leaf.subject.rfc4514_string(), len(trusted_cas))
-        for attempt in verification_attempts:
-            logger.error("  Verification failed: %s", attempt)
-        raise HTTPException(status_code=401, detail="Certificate chain not trusted")
+        logger.error("Top of chain not signed by any trusted CA. Top subject=%s, issuer=%s",
+                     top.subject.rfc4514_string(), top.issuer.rfc4514_string())
+        for ca in trusted_cas:
+            logger.error("  Trusted CA: %s", ca.subject.rfc4514_string())
+        raise HTTPException(status_code=401, detail="Top of chain not signed by a trusted CA")
 
     # Check leaf cert is not expired
     now = time.time()
