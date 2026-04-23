@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-04-23
+
+### Added
+- OAuth token endpoint (`POST /oauth2/token`) with JWT client assertion validation
+- x5c certificate chain verification against trusted LDN CA
+- Redis-backed token store with configurable TTL
+- FHIR endpoints accept Bearer tokens (validated against Redis)
+- docker-compose.yml for local development (app + Redis)
+
+### Changed
+- Authorization headers on `/oauth2/token` are optional (stored if present)
+- FHIR endpoints fall back to header-only auth when no Bearer token provided
+
 ## [0.4.1] - 2026-04-23
 
 ### Added

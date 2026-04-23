@@ -1,6 +1,6 @@
 [project]
 name = "headease-homemonitoring-poc"
-version = "0.4.2"
+version = "0.5.0"
 description = "HeadEase Home Monitoring PoC - Data Holder for GF Proeftuin"
 requires-python = ">=3.12"
 dependencies = [
