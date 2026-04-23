@@ -28,7 +28,8 @@ gcloud config set project cumuluz-vws-hackathon-april-26
 
 # Enable required APIs
 gcloud services enable container.googleapis.com artifactregistry.googleapis.com \
-  sqladmin.googleapis.com servicenetworking.googleapis.com compute.googleapis.com
+  sqladmin.googleapis.com servicenetworking.googleapis.com compute.googleapis.com \
+  cloudresourcemanager.googleapis.com iam.googleapis.com
 
 # Create state bucket
 gsutil mb -p cumuluz-vws-hackathon-april-26 -l europe-west4 gs://cumuluz-vws-hackathon-april-26-tf-state
