@@ -104,19 +104,6 @@ async def issue_token(
     if client_assertion_type != "urn:ietf:params:oauth:client-assertion-type:jwt-bearer":
         raise HTTPException(status_code=400, detail="Unsupported client_assertion_type")
 
-    # Validate required headers
-    missing = []
-    if not x_ura_identifier:
-        missing.append("x-ura-identifier")
-    if not x_healthcareproviderroletype:
-        missing.append("x-healthcareproviderroletype")
-    if not x_dezi_identifier:
-        missing.append("x-dezi-identifier")
-    if not x_dezi_roletype:
-        missing.append("x-dezi-roletype")
-    if missing:
-        raise HTTPException(status_code=400, detail=f"Missing required headers: {', '.join(missing)}")
-
     # Decode JWT header to get x5c (without verifying signature yet)
     try:
         unverified_header = jwt.get_unverified_header(client_assertion)
