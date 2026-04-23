@@ -14,6 +14,7 @@ certificates
 work-documents
 .claude
 chain-header.json
+*-deploy-key.json
 /terraform/terraform.tfvars
 /terraform/.terraform/
 /terraform/.terraform.lock.hcl
