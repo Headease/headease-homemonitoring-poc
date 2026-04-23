@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-23
+
+### Added
+- GitHub Actions CI/CD workflow (build, push, deploy)
+- Let's Encrypt TLS via cert-manager
+- Nginx ingress controller in Terraform
+- MIT license
+
+### Changed
+- NVI registration switched from NVIDataReference to FHIR List API (`/v1-poc/fhir/List`)
+- NVI check uses `nvi-pseudonym` NamingSystem for `subject:identifier` queries
+- Removed `nvi-locate`, `nvi-registrations`, `register-nvi-list` endpoints
+- SCRIPT.md uses `$BASE_URL` variable (default `data-source.gf-cumuluz-poc.headease.nl`)
+- Docker image tagged with version from `pyproject.toml` instead of git SHA
+- GKE cluster changed to zonal (single node) instead of regional (3 nodes)
+
+### Fixed
+- Endpoint search uses `organization.identifier` for LRZa upsert
+- `backend.tf` removed unsupported `project` argument
+- Terraform uses `kubernetes_namespace_v1` (not deprecated `kubernetes_namespace`)
+
 ## [0.2.0] - 2026-04-23
 
 ### Added
