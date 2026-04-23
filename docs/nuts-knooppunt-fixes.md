@@ -38,31 +38,13 @@ https://github.com/Headease/headease-homemonitoring-poc
 
 ---
 
-## Fix 3: `encryptedPersonalId` encoding in PRS request (component.go) — TODO
+## Fix 3: `encryptedPersonalId` encoding in PRS request (component.go) — NOT NEEDED
 
 **File:** `component/pseudonymisation/component.go` (around line 119-123)
 
-**Problem:** The `EncryptedPersonalID` field is declared as `[]byte`, which Go's `json.Marshal` encodes as **base64 standard encoding** (alphabet `A-Za-z0-9+/`). The PRS expects **base64url encoding** (alphabet `A-Za-z0-9-_`).
+**Observation:** The `EncryptedPersonalID` field is declared as `[]byte` (base64 standard in Go). The PRS validator uses base64url decoding. In theory this could cause issues when `+` or `/` appear in the encoded value, but in practice the knooppunt works with only Fix 1 and Fix 2 applied. Applying this fix actually broke the PRS call.
 
-**Proposed fix:** Change field to `string` and encode explicitly with base64url:
-```go
-type prsEvaluateRequest struct {
-    RecipientOrganization string `json:"recipientOrganization"`
-    RecipientScope        string `json:"recipientScope"`
-    EncryptedPersonalID   string `json:"encryptedPersonalId"`
-}
-```
-
-And in `callPRSEvaluate`, encode the blinded input:
-```go
-requestBody := prsEvaluateRequest{
-    RecipientOrganization: "ura:" + recipientURA,
-    RecipientScope:        scope,
-    EncryptedPersonalID:   base64.RawURLEncoding.EncodeToString(blindedInputData),
-}
-```
-
-**Evidence:** The PRS explicitly validates this field as base64url (see [models.py](https://github.com/minvws/gfmodules-pseudoniemendienst/blob/main/oprf/models.py)). Sending base64 standard encoding (with `+/`) will cause `400 Bad Request: "Unable to evaluate blind"` when the blinded bytes happen to contain values that produce `+` or `/` characters (~50% of requests).
+**Status:** Do not apply. The current encoding works.
 
 ---
 
