@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.3] - 2026-04-24
+
+### Fixed
+- FHIR proxy strips `Content-Encoding` header so httpx-decompressed bodies aren't double-decoded by clients
+- Token endpoint: JWT `aud` is the token endpoint URL (per RFC 7523); target service is checked via `target_audience` claim
+- Seeder waits up to 5 minutes for HAPI readiness (Cloud SQL cold starts)
+- Data-user script filters `$lastn` observations client-side by LOINC code
+
+### Added
+- `POST /internal/seed` endpoint on FHIR service for manual HAPI sample-data trigger
+- Cloud SQL instance renamed to `-v2` with `db-g1-small` tier for faster provisioning
+
 ## [0.11.1] - 2026-04-24
 
 ### Changed
