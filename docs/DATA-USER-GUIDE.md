@@ -202,11 +202,17 @@ Relevant codes for home monitoring: `Patient`, `ObservationVitalSigns`. See the 
 
 ### Option B: Query via List resources
 
+Search by pseudonymised BSN and data category code (`Patient` or `ObservationVitalSigns`):
+
 ```bash
-curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-data-categories-cs|Patient" \
+curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=https://nvi.proeftuin.gf.irealisatie.nl/fhir/NamingSystem/nvi-pseudonym|<nvi-identifier>&code=http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-data-categories-cs|Patient" \
   --cert ldn-chain.crt --key private.key \
   -H "Authorization: Bearer <nvi-token>"
 ```
+
+HeadEase registers two data categories per patient:
+- `Patient` — patient demographics
+- `ObservationVitalSigns` — blood pressure, body weight
 
 ## Step 3: Obtain Data Holder Addresses from LRZa
 
@@ -307,9 +313,11 @@ LOINC `29463-7` = Body weight (kg).
 - The `/test/oprf/client` endpoint is useful for debugging — it does the blinding server-side
 
 ### NVI
-- Two API styles available: FHIR List (`/v1-poc/fhir/List`) and NVIDataReference (`/NVIDataReference`)
+- Registration via FHIR List API (`POST /v1-poc/fhir/List`)
+- Querying via `GET /v1-poc/fhir/List` with `subject:identifier` using system `https://nvi.proeftuin.gf.irealisatie.nl/fhir/NamingSystem/nvi-pseudonym`
 - The NVI's own URA is `90000901`
 - The NVI identifier in `subject.identifier.value` is a base64url-encoded JSON containing `evaluated_output` (the JWE) and `blind_factor`
+- HeadEase publishes two data categories: `Patient` and `ObservationVitalSigns`
 - NVI OpenAPI spec: `https://nvi.proeftuin.gf.irealisatie.nl/openapi.json` (requires mTLS)
 
 ### LRZa
