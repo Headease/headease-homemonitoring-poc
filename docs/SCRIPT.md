@@ -73,6 +73,22 @@ Check if we are findable for a given BSN:
 curl "$BASE_URL/admin/nvi-check?bsn=004895708" | python -m json.tool
 ```
 
+### Alternative: via nuts-knooppunt
+
+The same operations are available via the nuts-knooppunt, which handles pseudonymisation transparently — you send plain BSNs:
+
+**Register:**
+```bash
+curl -X POST "$BASE_URL/admin/register-nvi-nk?bsn=004895708" | python -m json.tool
+```
+
+**Verify:**
+```bash
+curl "$BASE_URL/admin/nvi-check-nk?bsn=004895708" | python -m json.tool
+```
+
+Both should produce identical NVI registrations. Use these to verify that the direct and knooppunt implementations match.
+
 ## Step 3: Serve FHIR data (passive — data users call us)
 
 Once registered, data users will query our FHIR endpoints:
