@@ -25,7 +25,18 @@ def _build_organization() -> dict:
     }
 
 
-def _build_fhir_endpoint() -> dict:
+def _managing_org_ref(org_id: str) -> dict:
+    """Build a managingOrganization with both reference and identifier."""
+    return {
+        "reference": f"Organization/{org_id}",
+        "identifier": {
+            "system": "http://fhir.nl/fhir/NamingSystem/ura",
+            "value": settings.ura_number,
+        },
+    }
+
+
+def _build_fhir_endpoint(org_id: str) -> dict:
     return {
         "resourceType": "Endpoint",
         "status": "active",
@@ -34,12 +45,7 @@ def _build_fhir_endpoint() -> dict:
             "code": "hl7-fhir-rest",
         },
         "name": f"{settings.organization_name} FHIR Endpoint",
-        "managingOrganization": {
-            "identifier": {
-                "system": "http://fhir.nl/fhir/NamingSystem/ura",
-                "value": settings.ura_number,
-            }
-        },
+        "managingOrganization": _managing_org_ref(org_id),
         "payloadType": [
             {
                 "coding": [
@@ -54,7 +60,7 @@ def _build_fhir_endpoint() -> dict:
     }
 
 
-def _build_oauth_endpoint() -> dict:
+def _build_oauth_endpoint(org_id: str) -> dict:
     return {
         "resourceType": "Endpoint",
         "status": "active",
@@ -63,12 +69,7 @@ def _build_oauth_endpoint() -> dict:
             "code": "oauth2",
         },
         "name": f"{settings.organization_name} OAuth2 Endpoint",
-        "managingOrganization": {
-            "identifier": {
-                "system": "http://fhir.nl/fhir/NamingSystem/ura",
-                "value": settings.ura_number,
-            }
-        },
+        "managingOrganization": _managing_org_ref(org_id),
         "payloadType": [
             {
                 "coding": [
@@ -122,12 +123,14 @@ async def register_at_lrza():
         results["organization"] = await _upsert_resource(
             client, _build_organization(), ura_search
         )
+        org_id = results["organization"].get("id") or results["organization"]["resource"]["id"]
+
         results["fhir_endpoint"] = await _upsert_resource(
-            client, _build_fhir_endpoint(),
+            client, _build_fhir_endpoint(org_id),
             f"name={settings.organization_name} FHIR Endpoint",
         )
         results["oauth_endpoint"] = await _upsert_resource(
-            client, _build_oauth_endpoint(),
+            client, _build_oauth_endpoint(org_id),
             f"name={settings.organization_name} OAuth2 Endpoint",
         )
 
