@@ -30,3 +30,10 @@ app.include_router(token_router)
 @app.get("/")
 async def root():
     return {"status": "ok", "service": "HeadEase FHIR Data Holder"}
+
+
+@app.post("/internal/seed")
+async def manual_seed():
+    """Manually trigger HAPI sample data seeding."""
+    ok = await seed_hapi()
+    return {"seeded": bool(ok)}

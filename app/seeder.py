@@ -72,19 +72,21 @@ async def seed_hapi():
     """
     async with httpx.AsyncClient(timeout=30) as client:
         # Wait for HAPI to be ready
-        for attempt in range(30):
+        max_attempts = 150  # 150 × 2s = 5 min
+        for attempt in range(max_attempts):
             try:
                 r = await client.get(f"{settings.hapi_base_url}/metadata")
                 if r.status_code == 200:
                     break
             except httpx.HTTPError:
                 pass
-            logger.info("Waiting for HAPI (%d/30)...", attempt + 1)
+            if attempt % 10 == 0:
+                logger.info("Waiting for HAPI (%d/%d)...", attempt + 1, max_attempts)
             import asyncio
             await asyncio.sleep(2)
         else:
-            logger.error("HAPI not reachable at %s", settings.hapi_base_url)
-            return
+            logger.error("HAPI not reachable at %s after %d attempts", settings.hapi_base_url, max_attempts)
+            return False
 
         # Check if already seeded
         r = await client.get(
@@ -93,13 +95,13 @@ async def seed_hapi():
         )
         if r.status_code == 200 and r.json().get("total", 0) > 0:
             logger.info("HAPI already has sample data for BSN %s", SAMPLE_BSN)
-            return
+            return True
 
         # Create Patient
         r = await client.post(f"{settings.hapi_base_url}/Patient", json=_make_patient(SAMPLE_BSN))
         if r.status_code not in (200, 201):
             logger.error("Failed to create Patient: %d %s", r.status_code, r.text[:200])
-            return
+            return False
         patient_id = r.json()["id"]
         logger.info("Created Patient/%s for BSN %s", patient_id, SAMPLE_BSN)
 
@@ -117,3 +119,4 @@ async def seed_hapi():
                 logger.warning("Failed to create Observation: %d %s", r.status_code, r.text[:200])
 
         logger.info("Seeded sample data for BSN %s", SAMPLE_BSN)
+        return True
