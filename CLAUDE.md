@@ -61,7 +61,7 @@ uvicorn app.main:app --reload --port 8000
 - **LRZa**: `https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir` — HAPI FHIR server (note double `/FHIR/fhir`)
 - **NVI**: `https://nvi.proeftuin.gf.irealisatie.nl` — nationale verwijsindex (URA `90000901`)
 - **PRS**: `https://pseudoniemendienst.proeftuin.gf.irealisatie.nl` — pseudonymisation service
-- **Public URL**: `https://ngrok.headease.nl` — ngrok tunnel to local server
+- **Public URL**: `https://data-source.gf-cumuluz-poc.headease.nl` — GKE deployment
 
 ## Key Implementation Details
 
@@ -70,6 +70,16 @@ uvicorn app.main:app --reload --port 8000
 - The `recipientOrganization` for PRS calls is the NVI (`ura:90000901`), not our own URA
 - The `recipientScope` is `nationale-verwijsindex`
 - OAuth tokens need `target_audience` matching the service URL and `cnf.x5t#S256` with LDN cert thumbprint
+
+## Versioning & Release
+
+The version is defined in `pyproject.toml` and used as the Docker image tag. When releasing a new version, update these files:
+
+1. `CHANGELOG.md` — add a new section with the changes
+2. `pyproject.toml` — bump the `version` field
+3. `terraform/variables.tf` — update the `image_tag` default to match
+
+The GitHub Actions workflow reads the version from `pyproject.toml` and tags the Docker image accordingly. On push to `main`, the image is built and deployed automatically.
 
 ## Reference
 

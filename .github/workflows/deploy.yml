@@ -66,9 +66,11 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      - name: Set image tag
+      - name: Get version from pyproject.toml
         id: meta
-        run: echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build and push
         run: |
