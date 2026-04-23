@@ -124,11 +124,11 @@ async def register_at_lrza():
         )
         results["fhir_endpoint"] = await _upsert_resource(
             client, _build_fhir_endpoint(),
-            f"organization.identifier=http://fhir.nl/fhir/NamingSystem/ura|{settings.ura_number}&connection-type=hl7-fhir-rest",
+            f"name={settings.organization_name} FHIR Endpoint",
         )
         results["oauth_endpoint"] = await _upsert_resource(
             client, _build_oauth_endpoint(),
-            f"organization.identifier=http://fhir.nl/fhir/NamingSystem/ura|{settings.ura_number}&connection-type=oauth2",
+            f"name={settings.organization_name} OAuth2 Endpoint",
         )
 
     return {"status": "registered", "results": results}
