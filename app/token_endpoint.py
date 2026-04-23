@@ -48,10 +48,15 @@ def _load_trusted_cas() -> list[x509.Certificate]:
     for path in [settings.uzi_ca_cert_path, settings.ldn_ca_cert_path]:
         try:
             pem = path.read_bytes()
-            cas.append(x509.load_pem_x509_certificate(pem))
-            logger.info("Loaded trusted CA: %s", path.name)
+            ca = x509.load_pem_x509_certificate(pem)
+            cas.append(ca)
+            logger.info("Loaded trusted CA: %s -> %s", path, ca.subject.rfc4514_string())
+        except FileNotFoundError:
+            logger.error("MISSING CA cert file: %s — client JWT verification will fail for certs signed by this CA", path)
         except Exception as e:
-            logger.warning("Could not load CA %s: %s", path, e)
+            logger.error("Could not load CA %s: %s", path, e)
+    if not cas:
+        logger.error("No trusted CAs loaded — all client assertions will be rejected!")
     return cas
 
 
