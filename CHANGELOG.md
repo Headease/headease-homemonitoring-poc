@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-04-23
+
+### Fixed
+- NVI check uses JWE pseudonym as `subject:identifier` value, not the full packaged NVI identifier
+
 ## [0.3.1] - 2026-04-23
 
 ### Changed
