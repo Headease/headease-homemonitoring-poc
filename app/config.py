@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # Trusted LDN CA for validating incoming client assertions
     ldn_ca_cert: Path = Path("certificates/headease-certificates-proeftuin/headease-ldn-external-intermediate/ldn-ca.crt")
 
+    # Nuts-knooppunt internal API host
+    nk_host: str = "nuts-knooppunt"
+
     # Redis
     redis_url: str = "redis://localhost:6379"
     token_ttl: int = 3600
