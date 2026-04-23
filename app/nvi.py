@@ -120,7 +120,7 @@ async def check_nvi_registration(bsn: str = "004895708"):
         resp = await client.get(
             f"{settings.nvi_base_url}/v1-poc/fhir/List",
             params={
-                "subject:identifier": f"{NVI_IDENTIFIER_SYSTEM}|{nvi_identifier}",
+                "subject:identifier": f"https://nvi.proeftuin.gf.irealisatie.nl/fhir/NamingSystem/nvi-pseudonym|{nvi_identifier}",
             },
             headers={"Authorization": f"Bearer {token}"},
         )
