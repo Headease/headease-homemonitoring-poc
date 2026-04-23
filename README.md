@@ -14,33 +14,46 @@ This PoC implements the data holder steps from the [home monitoring input script
 4. **Serve FHIR data** — Patient search by BSN, Observation `$lastn` for BloodPressure and BodyWeight
 5. **Verify authorization** — required headers on incoming requests
 
-The service is exposed publicly via `ngrok.headease.nl`.
-
 ## Stack
 
-- Python 3.12+
-- FastAPI + Uvicorn
+- Python 3.12+, FastAPI, Uvicorn
+- pyoprf / liboprf (OPRF blinding)
 - httpx (mTLS outbound calls)
-- pysodium (OPRF ristretto255 blinding)
 - cryptography (HKDF derivation)
 - PyJWT (OAuth client assertions)
 
-## Setup
+## Running locally with Docker
+
+```bash
+# Build the image (includes liboprf)
+docker build --platform linux/amd64 -t headease-homemonitoring:latest .
+
+# Run with certificates and .env
+docker run --rm -p 8000:8000 \
+  -v $(pwd)/certificates:/certs:ro \
+  --env-file .env \
+  -e HEADEASE_CLIENT_CERT=/certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi-chain.crt \
+  -e HEADEASE_CLIENT_KEY=/certs/headease_nvi_20260202_145627.key \
+  -e HEADEASE_UZI_CERT=/certs/headease-certificates-proeftuin/headease-uzi-external-intermediate/headease-uzi.crt \
+  -e HEADEASE_UZI_INTERMEDIATE_CERT=/certs/gfmodules-test-uzi-external-intermediate.cer \
+  -e HEADEASE_LDN_CERT=/certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn.crt \
+  -e HEADEASE_LDN_CHAIN_CERT=/certs/headease-certificates-proeftuin/headease-ldn-external-intermediate/headease-ldn-chain.crt \
+  headease-homemonitoring:latest
+```
+
+The app is available at `http://localhost:8000`.
+
+## Development setup (without Docker)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env
-```
-
-> **Note:** `pysodium` requires `libsodium`. On macOS: `brew install libsodium`. Building `SecureString` (transitive dep) may need OpenSSL headers: `CFLAGS="-I$(brew --prefix openssl)/include" pip install -e ".[dev]"`.
-
-## Running
-
-```bash
 uvicorn app.main:app --reload --port 8000
 ```
+
+> **Note:** Requires `liboprf` and `libsodium` installed locally. See the [Dockerfile](Dockerfile) for build steps.
 
 ## API Endpoints
 
@@ -57,7 +70,7 @@ uvicorn app.main:app --reload --port 8000
 |--------|------|-------------|
 | POST | `/admin/register` | Register Organization + Endpoints at LRZa |
 | POST | `/admin/register-nvi` | Pseudonymise BSN + register List at NVI |
-| POST | `/admin/register-nvi-list` | Same, using single List POST |
+| GET | `/admin/nvi-check` | Check NVI registration for a BSN |
 | GET | `/admin/token` | Get OAuth Bearer token (service=nvi or service=prs) |
 
 ### Authorization
@@ -81,13 +94,17 @@ Environment variables (prefix `HEADEASE_`), see `.env.example` for all options:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HEADEASE_FHIR_BASE_URL` | `https://ngrok.headease.nl/fhir` | Public FHIR base URL |
+| `HEADEASE_FHIR_BASE_URL` | `https://data-source.gf-cumuluz-poc.headease.nl/fhir` | Public FHIR base URL |
 | `HEADEASE_LRZA_BASE_URL` | `https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir` | LRZa service URL |
 | `HEADEASE_NVI_BASE_URL` | `https://nvi.proeftuin.gf.irealisatie.nl` | NVI service URL |
 | `HEADEASE_PRS_BASE_URL` | `https://pseudoniemendienst.proeftuin.gf.irealisatie.nl` | PRS service URL |
 | `HEADEASE_OAUTH_BASE_URL` | `https://oauth.proeftuin.gf.irealisatie.nl` | OAuth service URL |
 | `HEADEASE_URA_NUMBER` | `90000315` | Our organization URA identifier |
 | `HEADEASE_NVI_URA_NUMBER` | `90000901` | NVI URA (PRS recipient) |
+
+## Deployment
+
+See [terraform/README.md](terraform/README.md) for GKE deployment with Terraform, Helm, and GitHub Actions CI/CD.
 
 ## Documentation
 
@@ -97,3 +114,7 @@ Environment variables (prefix `HEADEASE_`), see `.env.example` for all options:
 ## Sample Data
 
 The app seeds one patient (BSN `004895708`) with 3 blood pressure and 3 body weight observations on startup.
+
+## License
+
+[MIT](LICENSE)
