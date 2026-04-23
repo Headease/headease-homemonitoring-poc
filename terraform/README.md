@@ -122,6 +122,10 @@ gcloud projects add-iam-policy-binding $PROJECT \
 
 gcloud projects add-iam-policy-binding $PROJECT \
   --member="serviceAccount:$SA_EMAIL" \
+  --role="roles/compute.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT \
+  --member="serviceAccount:$SA_EMAIL" \
   --role="roles/artifactregistry.writer"
 
 gcloud projects add-iam-policy-binding $PROJECT \
@@ -150,6 +154,7 @@ gcloud iam service-accounts keys create github-deploy-key.json \
 | Role | Purpose |
 |------|---------|
 | `roles/container.admin` | Create/manage GKE cluster, deploy Helm charts |
+| `roles/compute.admin` | Manage GKE node pools and instance groups |
 | `roles/artifactregistry.writer` | Push Docker images |
 | `roles/storage.admin` | Access Terraform state bucket |
 | `roles/iam.serviceAccountUser` | Create resources as the service account |
