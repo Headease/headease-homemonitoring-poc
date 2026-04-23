@@ -37,6 +37,7 @@ COPY --from=builder /liboprf/src/lib*.so /usr/local/lib/
 RUN ldconfig
 
 COPY app/ app/
+COPY scripts/ scripts/
 
 # APP_MODULE: app.main_fhir:app, app.main_admin:app, or app.main:app (combined)
 ENV APP_MODULE=app.main:app

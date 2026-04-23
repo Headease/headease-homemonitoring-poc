@@ -4,7 +4,10 @@
 Implements the 6-step data user script from:
 https://github.com/minvws/generiekefuncties-docs/discussions/32
 
-Usage:
+Usage (inside Docker — recommended, liboprf required):
+    ./scripts/data-user.sh [BSN]
+
+Or directly if liboprf is installed locally:
     source .venv/bin/activate
     python scripts/data-user.py [BSN]
 
