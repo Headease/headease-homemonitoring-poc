@@ -112,14 +112,12 @@ async def step2_query_nvi(nvi_identifier: str) -> list[str]:
     print("\n[2/5] Querying NVI for data holders...")
     token = await _get_proeftuin_token("epd:write", settings.nvi_base_url)
     nvi_id_system = "http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier"
-    data_cat_system = "http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-data-categories-cs"
 
     async with httpx.AsyncClient(verify=_ssl_context(), timeout=30) as client:
         resp = await client.get(
             f"{settings.nvi_base_url}/v1-poc/fhir/List",
             params={
                 "subject:identifier": f"{nvi_id_system}|{nvi_identifier}",
-                "code": f"{data_cat_system}|Patient",
             },
             headers={"Authorization": f"Bearer {token}"},
         )
