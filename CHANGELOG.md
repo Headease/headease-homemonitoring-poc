@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-04-23
+
+### Added
+- NVI endpoints via nuts-knooppunt (`/admin/register-nvi-nk`, `/admin/nvi-check-nk`)
+- nuts-knooppunt handles pseudonymisation transparently (plain BSN in, pseudonym out)
+- Parallel endpoints allow comparing direct vs knooppunt NVI implementations
+- nuts-knooppunt Helm chart configured with mTLS certs and proeftuin service URLs
+
 ## [0.7.0] - 2026-04-23
 
 ### Added
