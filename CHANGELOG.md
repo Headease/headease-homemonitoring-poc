@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-04-23
+
+### Added
+- Split into FHIR service and Admin service (same image, different entrypoints)
+- `app.main_fhir:app` — public FHIR endpoints + `/oauth2/token`
+- `app.main_admin:app` — registration, NVI, proeftuin tokens
+- docker-compose runs both services on ports 8000 and 8001
+
+### Changed
+- Helm chart deploys two Deployments and Services (fhir + admin)
+- Ingress points to FHIR service only
+- Dockerfile uses `APP_MODULE` env var for entrypoint selection
+- Helm chart version bumped to 0.4.0
+
 ## [0.5.0] - 2026-04-23
 
 ### Added
