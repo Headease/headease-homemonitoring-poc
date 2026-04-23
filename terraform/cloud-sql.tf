@@ -20,7 +20,7 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 
 resource "google_sql_database_instance" "hapi" {
   name                = "${var.cluster_name}-hapi-db"
-  database_version    = "POSTGRES_15"
+  database_version    = "POSTGRES_17"
   region              = var.region
   deletion_protection = false
 
