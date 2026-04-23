@@ -1,8 +1,9 @@
 resource "helm_release" "nuts_knooppunt" {
-  name             = "nuts-knooppunt"
-  chart            = "${path.module}/../../NUTS/nuts-knooppunt/helm/nuts-knooppunt"
-  namespace        = kubernetes_namespace_v1.headease.metadata[0].name
-  create_namespace = false
+  name       = "nuts-knooppunt"
+  repository = "oci://ghcr.io/nuts-foundation"
+  chart      = "helm-nuts-knooppunt"
+  version    = "0.11.0"
+  namespace  = kubernetes_namespace_v1.headease.metadata[0].name
 
   values = [templatefile("${path.module}/nuts-knooppunt-values.yaml.tpl", {
     host = var.host
