@@ -46,15 +46,11 @@ def _build_fhir_endpoint(org_id: str) -> dict:
         },
         "name": f"{settings.organization_name} FHIR Endpoint",
         "managingOrganization": _managing_org_ref(org_id),
+        # We publish both Patient and ObservationVitalSigns — each payloadType
+        # is a separate CodeableConcept so data users can filter by either.
         "payloadType": [
-            {
-                "coding": [
-                    {
-                        "system": DATA_CATEGORIES_CS,
-                        "code": "Patient",
-                    }
-                ]
-            }
+            {"coding": [{"system": DATA_CATEGORIES_CS, "code": "Patient"}]},
+            {"coding": [{"system": DATA_CATEGORIES_CS, "code": "ObservationVitalSigns"}]},
         ],
         "address": settings.fhir_base_url,
     }
