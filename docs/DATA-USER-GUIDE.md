@@ -206,7 +206,7 @@ Relevant codes for home monitoring: `Patient`, `ObservationVitalSigns`. See the 
 Search by pseudonymised BSN and data category code (`Patient` or `ObservationVitalSigns`):
 
 ```bash
-curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=https://nvi.proeftuin.gf.irealisatie.nl/fhir/NamingSystem/nvi-pseudonym|<nvi-identifier>&code=http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-data-categories-cs|Patient" \
+curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=Patient" \
   --cert ldn-chain.crt --key private.key \
   -H "Authorization: Bearer <nvi-token>"
 ```
@@ -334,7 +334,7 @@ LOINC `29463-7` = Body weight (kg).
 
 ### NVI
 - Registration via FHIR List API (`POST /v1-poc/fhir/List`)
-- Querying via `GET /v1-poc/fhir/List` with `subject:identifier` using system `https://nvi.proeftuin.gf.irealisatie.nl/fhir/NamingSystem/nvi-pseudonym`
+- Querying via `GET /v1-poc/fhir/List` with `subject:identifier` using system `http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier`
 - The NVI's own URA is `90000901`
 - The NVI identifier in `subject.identifier.value` is a base64url-encoded JSON containing `evaluated_output` (the JWE) and `blind_factor`
 - HeadEase publishes two data categories: `Patient` and `ObservationVitalSigns`
