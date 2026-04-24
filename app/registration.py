@@ -70,12 +70,14 @@ def _build_oauth_endpoint(org_id: str) -> dict:
         },
         "name": f"{settings.organization_name} OAuth2 Endpoint",
         "managingOrganization": _managing_org_ref(org_id),
+        # payloadType is required by FHIR R4 but OAuth endpoints carry no clinical
+        # payload — use "none" from the standard endpoint-payload-type CodeSystem.
         "payloadType": [
             {
                 "coding": [
                     {
-                        "system": DATA_CATEGORIES_CS,
-                        "code": "Patient",
+                        "system": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type",
+                        "code": "none",
                     }
                 ]
             }
