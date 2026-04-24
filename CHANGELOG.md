@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.4] - 2026-04-24
+
+### Changed
+- FHIR Endpoint `payloadType` now lists both `Patient` and `ObservationVitalSigns`
+- OAuth Endpoint `connectionType` now uses `nl-gf-authorization-server-cs|oauth2`
+- OAuth Endpoint `payloadType` now `endpoint-payload-type|none` (was misleadingly `Patient`)
+- Data user script and guide search with the qualified OAuth `connection-type`
+- CI tags Docker images with `VERSION-SHA8` so every commit triggers a K8s rollout
+
+### Fixed
+- Cert chain verification handles RSA padding (no longer `TypeError` on `public_key().verify()`)
+- JWT `aud` comparison: check `target_audience` claim against FHIR base URL (RFC 7523)
+- FHIR proxy strips `Content-Encoding` so httpx-decompressed bodies aren't double-decoded
+- Seeder waits up to 5 minutes for HAPI readiness
+
 ## [0.11.3] - 2026-04-24
 
 ### Fixed
