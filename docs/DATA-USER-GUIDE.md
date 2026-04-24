@@ -2,6 +2,8 @@
 
 Instruction document for the **data user** role in the GF Proeftuin home monitoring use case. This guide covers locating data holders, obtaining pseudonyms, and querying patient data (BloodPressure, BodyWeight).
 
+> A complete Python reference implementation of this flow is in [`scripts/data-user.py`](../scripts/data-user.py). Run via `./scripts/data-user.sh [BSN]`.
+
 ## Proeftuin Services
 
 | Service | Base URL | Swagger/Docs |
@@ -84,7 +86,7 @@ Before querying the NVI, you need a pseudonymised BSN. The pseudonymisation uses
 import base64, json
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-import pysodium
+import pyoprf
 
 personal_identifier = {"landCode": "NL", "type": "BSN", "value": "004895708"}
 
@@ -93,24 +95,23 @@ recipient_organization = "ura:90000901"
 recipient_scope = "nationale-verwijsindex"
 
 info = f"{recipient_organization}|{recipient_scope}|v1".encode("utf-8")
-pid = json.dumps(personal_identifier).encode("utf-8")
+# RFC 8785 canonical JSON: no whitespace, sorted keys
+pid = json.dumps(personal_identifier, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 pseudonym = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=info).derive(pid)
 
-# OPRF blind using ristretto255
-point = pysodium.crypto_core_ristretto255_from_hash(
-    pysodium.crypto_generichash(pseudonym, outlen=64)
-)
-blind_factor = pysodium.crypto_core_ristretto255_scalar_random()
-blinded_point = pysodium.crypto_scalarmult_ristretto255(blind_factor, point)
+# OPRF blind per RFC 9497 (VOPRF with ristretto255)
+blind_factor, blinded_input = pyoprf.blind(pseudonym)
 
 blind_factor_b64 = base64.urlsafe_b64encode(blind_factor).decode()
-blinded_input_b64 = base64.urlsafe_b64encode(blinded_point).decode()
+blinded_input_b64 = base64.urlsafe_b64encode(blinded_input).decode()
 ```
 
 > **Critical:** The `recipientOrganization` must be the NVI's URA (`90000901`), not your own. The PRS encrypts the result for the recipient's public key. The scope at the PRS for the NVI is `nationale-verwijsindex`.
 
-> **Dependency:** `pysodium` requires `libsodium`. The `pyoprf` package wraps this but needs `liboprf` (a native C library) which may not be available. Using `pysodium` directly with ristretto255 is a working alternative.
+> **JSON canonicalization:** The HKDF input must use [RFC 8785 (JCS)](https://www.rfc-editor.org/rfc/rfc8785) — no whitespace, sorted keys. This is the agreement across PRS/NVI implementations. Python's default `json.dumps(obj)` adds spaces and produces **incompatible** pseudonyms.
+
+> **Dependency:** `pyoprf` (Python wrapper) needs `liboprf` (native C library). A working Docker setup is provided in this repository (`Dockerfile` builds liboprf from source).
 
 ### 1b. Call PRS to Evaluate
 
@@ -235,26 +236,47 @@ curl "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/Endpoint?man
 
 ### 4a. Request an Access Token
 
-Request an access token from the data holder's OAuth endpoint. Include the required headers:
-
-- `x-ura-identifier` — your organization's URA number
-- `x-healthcareproviderroletype` — your role type
-- `x-dezi-identifier` — the user's identifier
-- `x-dezi-roletype` — the user's role type
-
-Scope: `patient/*.rs`
-
-> **Note:** In the current PoC, the data holder (HeadEase) does not implement its own OAuth server. The authorization headers are validated directly on the FHIR endpoints.
-
-### 4b. Search for the Patient
+Post a JWT client assertion to the data holder's OAuth endpoint (same JWT structure as Step 0 but with `aud` = the data holder's token endpoint and `target_audience` = the data holder's FHIR base URL).
 
 ```bash
-curl -X POST https://data-source.gf-cumuluz-poc.headease.nl/fhir/Patient/_search \
-  -H "Content-Type: application/x-www-form-urlencoded" \
+curl -X POST https://data-source.gf-cumuluz-poc.headease.nl/oauth2/token \
   -H "x-ura-identifier: <your-ura>" \
   -H "x-healthcareproviderroletype: doctor" \
   -H "x-dezi-identifier: <user-id>" \
   -H "x-dezi-roletype: practitioner" \
+  -d "grant_type=client_credentials" \
+  -d "scope=patient/*.rs" \
+  -d "target_audience=https://data-source.gf-cumuluz-poc.headease.nl/fhir" \
+  -d "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" \
+  -d "client_assertion=<signed-jwt>"
+```
+
+**Response:**
+```json
+{
+  "access_token": "<opaque-bearer-token>",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "patient/*.rs"
+}
+```
+
+The data holder validates:
+- JWT signature against the UZI CA (via the `x5c` header)
+- `aud` claim matches the data holder's token endpoint URL (RFC 7523)
+- `target_audience` claim matches the data holder's FHIR base URL
+- Stores the x-* identity headers in Redis alongside the opaque token
+
+The `x-*` headers are **stored but optional** on the token request — you can also pass them directly on FHIR requests (see 4b/4c).
+
+### 4b. Search for the Patient
+
+Use the Bearer token from 4a:
+
+```bash
+curl -X POST https://data-source.gf-cumuluz-poc.headease.nl/fhir/Patient/_search \
+  -H "Authorization: Bearer <access-token>" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
   -d "identifier=http://fhir.nl/fhir/NamingSystem/bsn|004895708"
 ```
 
@@ -264,10 +286,7 @@ curl -X POST https://data-source.gf-cumuluz-poc.headease.nl/fhir/Patient/_search
 
 ```bash
 curl 'https://data-source.gf-cumuluz-poc.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|85354-9&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
-  -H "x-ura-identifier: <your-ura>" \
-  -H "x-healthcareproviderroletype: doctor" \
-  -H "x-dezi-identifier: <user-id>" \
-  -H "x-dezi-roletype: practitioner"
+  -H "Authorization: Bearer <access-token>"
 ```
 
 LOINC `85354-9` = Blood pressure panel. The Observation contains components:
@@ -278,15 +297,15 @@ LOINC `85354-9` = Blood pressure panel. The Observation contains components:
 
 ```bash
 curl 'https://data-source.gf-cumuluz-poc.headease.nl/fhir/Observation/$lastn?code=http://loinc.org|29463-7&patient=http://fhir.nl/fhir/NamingSystem/bsn|004895708' \
-  -H "x-ura-identifier: <your-ura>" \
-  -H "x-healthcareproviderroletype: doctor" \
-  -H "x-dezi-identifier: <user-id>" \
-  -H "x-dezi-roletype: practitioner"
+  -H "Authorization: Bearer <access-token>"
 ```
 
 LOINC `29463-7` = Body weight (kg).
 
-> **Note:** Use single quotes around the URL to prevent `$lastn` from being interpreted as a shell variable. The `patient` parameter accepts both a Patient resource ID and a BSN identifier (`system|value`).
+> **Notes:**
+> - Use single quotes around the URL to prevent `$lastn` from being interpreted as a shell variable.
+> - The `patient` parameter accepts both a Patient resource ID and a BSN identifier (`system|value`).
+> - HAPI's `$lastn` may return more observations than requested; filter client-side by the LOINC code.
 
 ## Gotchas and Lessons Learned
 
@@ -308,7 +327,8 @@ LOINC `29463-7` = Body weight (kg).
 - The `recipientScope` for the NVI is `nationale-verwijsindex`
 - API field names use camelCase (`encryptedPersonalId`, `recipientOrganization`, `recipientScope`), not snake_case
 - The response field is `jwe`, not `evaluated_output`
-- The `pyoprf` Python package requires native `liboprf` which may not be available — use `pysodium` with ristretto255 directly as an alternative
+- Use `pyoprf.blind()` — bindings to `liboprf` (native C). The pysodium ristretto255-from-hash approach uses a different hash-to-group and produces incompatible pseudonyms
+- HKDF input must be RFC 8785 canonical JSON (no whitespace, sorted keys)
 - PRS OpenAPI spec: `https://pseudoniemendienst.proeftuin.gf.irealisatie.nl/openapi.json` (requires mTLS)
 - The `/test/oprf/client` endpoint is useful for debugging — it does the blinding server-side
 
@@ -326,10 +346,11 @@ LOINC `29463-7` = Body weight (kg).
 - mTLS required, but no Bearer token needed
 
 ### Data Holder FHIR Endpoints
-- Required authorization headers: `x-ura-identifier`, `x-healthcareproviderroletype`, `x-dezi-identifier`, `x-dezi-roletype`
-- Missing headers return HTTP 403
+- Authenticate with a **Bearer token** obtained from the data holder's `/oauth2/token` (see Step 4a)
+- Alternatively, FHIR endpoints accept the 4 `x-*` identity headers directly (fallback path used when no Bearer is present)
 - Patient search uses `POST /_search` with form-encoded `identifier` parameter
 - Observation `$lastn` accepts `patient` as either a Patient resource ID or a BSN identifier (`http://fhir.nl/fhir/NamingSystem/bsn|004895708`)
+- HAPI's `$lastn` may ignore the `code` filter — filter client-side by LOINC code
 - Use **single quotes** around URLs containing `$lastn` in shell to avoid variable interpolation
 - Mitz consent is assumed (not enforced in the PoC)
 
