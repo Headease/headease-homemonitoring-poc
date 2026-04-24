@@ -206,7 +206,7 @@ Relevant codes for home monitoring: `Patient`, `ObservationVitalSigns`. See the 
 Search by pseudonymised BSN and data category code (`Patient` or `ObservationVitalSigns`):
 
 ```bash
-curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-data-categories-cs|Patient" \
+curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=Patient" \
   --cert ldn-chain.crt --key private.key \
   -H "Authorization: Bearer <nvi-token>"
 ```
