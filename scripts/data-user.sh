@@ -12,6 +12,6 @@ cd "$(dirname "$0")/.."
 
 BSN=${1:-004895708}
 
-docker compose run --rm --no-deps \
+docker compose run --rm --no-deps --build \
   -v "$(pwd)/scripts:/app/scripts" \
   fhir python scripts/data-user.py "$BSN"

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.5] - 2026-04-24
+
+### Changed
+- Data user script NVI query filters by `code=ObservationVitalSigns` to target custodians publishing vital signs
+- Data user script rebuilds its Docker image on each run (`--build`) so local edits are picked up
+- Data user guide recommends filtering by the category you actually intend to fetch
+
 ## [0.11.4] - 2026-04-24
 
 ### Changed

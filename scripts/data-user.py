@@ -109,6 +109,7 @@ async def step1_pseudonymise(bsn: str) -> tuple[str, str]:
 # Step 2: Query NVI for data holders
 # ============================================================================
 async def step2_query_nvi(nvi_identifier: str) -> list[str]:
+    """Query NVI for data holders publishing data for this pseudonym."""
     print("\n[2/5] Querying NVI for data holders...")
     token = await _get_proeftuin_token("epd:write", settings.nvi_base_url)
     nvi_id_system = "http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier"
@@ -118,11 +119,14 @@ async def step2_query_nvi(nvi_identifier: str) -> list[str]:
             f"{settings.nvi_base_url}/v1-poc/fhir/List",
             params={
                 "subject:identifier": f"{nvi_id_system}|{nvi_identifier}",
+                "code" : "ObservationVitalSigns",
             },
             headers={"Authorization": f"Bearer {token}"},
         )
         resp.raise_for_status()
         bundle = resp.json()
+
+    print(f"      NVI returned {len(bundle.get('entry', []))} List entry/entries")
 
     uras = set()
     for entry in bundle.get("entry", []):

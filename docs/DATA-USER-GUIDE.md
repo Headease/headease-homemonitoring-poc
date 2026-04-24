@@ -206,7 +206,7 @@ Relevant codes for home monitoring: `Patient`, `ObservationVitalSigns`. See the 
 Search by pseudonymised BSN and data category code (`Patient` or `ObservationVitalSigns`):
 
 ```bash
-curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=Patient" \
+curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifier=http://minvws.github.io/generiekefuncties-docs/NamingSystem/nvi-identifier|<nvi-identifier>&code=ObservationVitalSigns" \
   --cert ldn-chain.crt --key private.key \
   -H "Authorization: Bearer <nvi-token>"
 ```
@@ -214,6 +214,8 @@ curl "https://nvi.proeftuin.gf.irealisatie.nl/v1-poc/fhir/List?subject:identifie
 HeadEase registers two data categories per patient:
 - `Patient` — patient demographics
 - `ObservationVitalSigns` — blood pressure, body weight
+
+Filter by the category you actually intend to fetch. For vital-signs retrieval use `code=ObservationVitalSigns` — querying `code=Patient` would also surface custodians that only publish demographics, wasting round trips to steps 3–5.
 
 ## Step 3: Obtain Data Holder Addresses from LRZa
 
