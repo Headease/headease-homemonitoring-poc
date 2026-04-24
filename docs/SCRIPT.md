@@ -27,8 +27,8 @@ curl -X POST $BASE_URL/admin/register | python -m json.tool
 This POSTs to `https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/` using mTLS:
 
 1. **Organization** — HeadEase with URA `90000315`
-2. **FHIR Endpoint** — `$BASE_URL/fhir` with payloadType `Patient`
-3. **OAuth Endpoint** — `$BASE_URL/oauth2/token`
+2. **FHIR Endpoint** — `$BASE_URL/fhir` with `connectionType=hl7-fhir-rest` and `payloadType=[Patient, ObservationVitalSigns]`
+3. **OAuth Endpoint** — `$BASE_URL/oauth2/token` with `connectionType=nl-gf-authorization-server-cs|oauth2` and `payloadType=endpoint-payload-type|none`
 
 **Expected result:** HTTP 200 with created resource IDs from the HAPI server.
 
