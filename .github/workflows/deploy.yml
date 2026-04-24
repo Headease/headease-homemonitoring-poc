@@ -70,15 +70,21 @@ jobs:
         id: meta
         run: |
           VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
-          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
+          SHA=${GITHUB_SHA::8}
+          # Unique tag per commit so K8s always sees a spec change and pulls.
+          # The version-only tag also gets pushed as a human-friendly pointer.
+          echo "tag=${VERSION}-${SHA}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build and push
         run: |
           docker build --platform linux/amd64 \
             -t ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }} \
+            -t ${{ env.IMAGE }}:${{ steps.meta.outputs.version }} \
             -t ${{ env.IMAGE }}:latest \
             .
           docker push ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+          docker push ${{ env.IMAGE }}:${{ steps.meta.outputs.version }}
           docker push ${{ env.IMAGE }}:latest
 
   deploy:
