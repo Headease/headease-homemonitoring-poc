@@ -159,7 +159,7 @@ async def step3_get_endpoints(ura: str) -> tuple[str | None, str | None]:
             f"{settings.lrza_base_url}/Endpoint",
             params={
                 "organization.identifier": f"http://fhir.nl/fhir/NamingSystem/ura|{ura}",
-                "connection-type": "oauth2",
+                "connection-type": "http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-authorization-server-cs|oauth2",
             },
         )
         resp.raise_for_status()

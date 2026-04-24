@@ -65,7 +65,7 @@ def _build_oauth_endpoint(org_id: str) -> dict:
         "resourceType": "Endpoint",
         "status": "active",
         "connectionType": {
-            "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+            "system": "http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-authorization-server-cs",
             "code": "oauth2",
         },
         "name": f"{settings.organization_name} OAuth2 Endpoint",

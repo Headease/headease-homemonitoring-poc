@@ -226,9 +226,9 @@ curl "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/Endpoint?man
 
 This returns the FHIR base URL of the data holder (e.g., `https://data-source.gf-cumuluz-poc.headease.nl/fhir`).
 
-Also retrieve the OAuth endpoint for the data holder:
+Also retrieve the OAuth endpoint for the data holder (uses the `nl-gf-authorization-server-cs` CodeSystem from the [nl-gf-connection-types-vs](https://minvws.github.io/generiekefuncties-docs/ValueSet-nl-gf-connection-types-vs.html) ValueSet):
 ```bash
-curl "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/Endpoint?managingOrganization.identifier=http://fhir.nl/fhir/NamingSystem/ura|90000315&connection-type=oauth2" \
+curl "https://adressering.proeftuin.gf.irealisatie.nl/poc/FHIR/fhir/Endpoint?managingOrganization.identifier=http://fhir.nl/fhir/NamingSystem/ura|90000315&connection-type=http://minvws.github.io/generiekefuncties-docs/CodeSystem/nl-gf-authorization-server-cs|oauth2" \
   --cert ldn-chain.crt --key private.key
 ```
 
